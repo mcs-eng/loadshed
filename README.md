@@ -12,6 +12,8 @@ The deployed Desk and Sale have each completed a live six-tool WebMCP run. See t
 [dated qualification receipt](SUBMISSION.md#qualification-receipt--august-29-2026) for the exact
 client, release, measured cuts, safety checks, and remaining human-evidence boundary.
 
+![Live Loadshed Desk showing an agent-set 100 ms contract, Crowd reduced from 480 to 48, the protected live trace, and intervention receipts](assets/loadshed-live-proof.jpg)
+
 The flagship demo is the site root: **Hold the Line**, a live-show desk that protects its trace and
 controls while synthetic crowd work loads the main thread. The [Sale demo](sale/) proves that the
 same runtime can protect a different page-owned task without learning that page's DOM. The

@@ -19,6 +19,7 @@ $releaseFiles = @(
     'LICENSE'
     'README.md'
     'SUBMISSION.md'
+    'assets/loadshed-live-proof.jpg'
     'index.html'
     'picker/index.html'
     'sale/index.html'

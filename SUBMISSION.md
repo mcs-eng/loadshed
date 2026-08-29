@@ -103,9 +103,10 @@ the Desk and Sale product files in that release are identical to private source 
   interaction sample. The runtime kept `rawCount` and `trustedCount` at zero and continued to ask
   for a person-supplied click; it did not invent before/after evidence.
 
-Two credential-free full-page screenshots were captured during the live cuts. One shows the Desk's
-agent contract, protected trace, 480-to-48 cut, agent receipts, and explicit request for a real click;
-the other shows the equivalent Sale proof.
+Two credential-free full-page screenshots were captured during the live cuts. The public
+[Desk proof](assets/loadshed-live-proof.jpg) shows the agent contract, protected trace, 480-to-48
+cut, agent receipts, and explicit request for a real click; the other shows the equivalent Sale
+proof. The same Desk frame is the Devpost proof thumbnail.
 
 Remaining qualification work is deliberately narrow: repeat the run in one client named by the
 official rules (ChatGPT's in-app browser or Chrome 149+), supply the physical click that the agent

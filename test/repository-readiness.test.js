@@ -11,6 +11,7 @@ test('reviewers get a runnable root README with the canonical judge path', () =>
   const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
   assert.match(readme, /https:\/\/mcs-eng\.github\.io\/loadshed\//);
   assert.match(readme, /https:\/\/github\.com\/mcs-eng\/loadshed/);
+  assert.match(readme, /assets\/loadshed-live-proof\.jpg/);
   assert.match(readme, /http:\/\/localhost:8080\//);
   assert.match(readme, /node --test test\\\*\.test\.js/);
   assert.match(readme, /inspect_responsiveness/);
@@ -45,6 +46,7 @@ test('public release export is allowlisted and excludes internal development art
   assert.match(exporter, /Destination must be outside the source repository/);
   assert.match(exporter, /Destination must be empty/);
   assert.match(exporter, /'index\.html'/);
+  assert.match(exporter, /'assets\/loadshed-live-proof\.jpg'/);
   assert.match(exporter, /'src\/loadshed\.js'/);
   assert.match(exporter, /'test\/repository-readiness\.test\.js'/);
   assert.doesNotMatch(exporter, /tournament\/|agy_draft|BUILD-DAY|BUILD-ORDER/);
