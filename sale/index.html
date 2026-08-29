@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Open Stock — Kiln Street</title>
+  <style>
+    :root {
+      --soot:#0b1214; --glass:#141c20; --ticket:#2a2218; --line:#3d4a48;
+      --ash:#7a9b96; --ember:#d4652f; --glint:#e8b86d; --paper:#e8dcc4;
+      --muted:#9a8f7c; --held:#c9e4d8; --mash:#c45c4a;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0; min-width:320px; color:var(--paper);
+      font:15px/1.45 "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+      background:
+        radial-gradient(ellipse at 18% 0%, rgba(212,101,47,.18), transparent 28rem),
+        radial-gradient(ellipse at 88% 12%, rgba(122,155,150,.12), transparent 26rem),
+        var(--soot);
+    }
+    button, input { font:inherit; } button { color:inherit; cursor:pointer; }
+    button:focus-visible, input:focus-visible { outline:3px solid var(--glint); outline-offset:3px; }
+    .shell { width:min(1500px, calc(100% - 32px)); margin:auto; padding:18px 0 28px; }
+    .topbar { display:flex; align-items:center; gap:18px; border:1px solid var(--line); background:rgba(16,24,28,.92); padding:12px 16px; border-radius:4px; }
+    .brand { font-family:Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif; font-size:22px; letter-spacing:.02em; white-space:nowrap; }
+    .air { color:var(--ember); font-size:11px; letter-spacing:.16em; text-transform:uppercase; white-space:nowrap; }
+    .pip { display:inline-block; width:8px; height:8px; border-radius:99px; background:var(--ember); margin-right:6px; box-shadow:0 0 12px var(--ember); }
+    .promise-line { margin:0 auto 0 4px; font-size:clamp(15px, 2vw, 20px); }
+    .promise-line small { color:var(--ash); text-transform:uppercase; letter-spacing:.12em; font-size:10px; margin-right:9px; }
+    .badge { border:1px solid var(--line); border-radius:99px; padding:4px 8px; color:var(--muted); font-size:11px; white-space:nowrap; }
+    .badge.good { border-color:#3d6d64; color:var(--ash); } .badge.warn { border-color:#765c2d; color:var(--glint); }
+    main { display:grid; grid-template-columns:minmax(0, 1fr) 340px; gap:16px; margin-top:16px; }
+    .stage, .rail section, .mixer { border:1px solid var(--line); background:linear-gradient(160deg, rgba(28,36,40,.96), rgba(10,14,16,.98)); border-radius:6px; }
+    .stage { min-height:580px; overflow:hidden; position:relative; padding:20px; display:grid; grid-template-rows:auto 1fr auto auto; }
+    .eyebrow { color:var(--ash); text-transform:uppercase; font-size:11px; letter-spacing:.14em; margin:0; }
+    .aisle { position:relative; min-height:360px; margin-top:10px; border:1px solid #2c3c3a; border-radius:6px; overflow:hidden; background:linear-gradient(180deg,#1a2426,#0e1416); }
+    #aisle-shimmer { position:absolute; inset:0; width:100%; height:100%; opacity:.88; transition:opacity .35s ease; }
+    .hush #aisle-shimmer { opacity:.32; }
+    .product-card {
+      position:relative; z-index:2; margin:22px 22px 40px; display:grid; grid-template-columns:minmax(0, 1fr) minmax(220px, .85fr); gap:18px;
+      padding:18px 18px 16px; border:1px solid rgba(232,220,196,.28); background:var(--ticket);
+      box-shadow:0 18px 48px rgba(0,0,0,.35); color:var(--paper);
+    }
+    .bowl { width:min(100%, 260px); max-height:132px; height:auto; display:block; }
+    .flash { display:inline-block; margin:0 0 8px; padding:3px 8px; border:1px solid var(--ember); color:var(--ember); font-size:10px; letter-spacing:.14em; text-transform:uppercase; }
+    .product-card h1 { margin:0; font-family:Palatino, "Palatino Linotype", Georgia, serif; font-size:clamp(22px, 3vw, 32px); font-weight:500; }
+    .price { margin:6px 0 0; font-size:20px; color:var(--glint); }
+    .meta { margin:8px 0 0; color:var(--muted); font-size:13px; }
+    .stub { display:flex; flex-direction:column; justify-content:space-between; padding-left:18px; border-left:2px dashed rgba(232,220,196,.28); }
+    .chips { display:flex; flex-wrap:wrap; gap:8px; }
+    .chip {
+      min-height:40px; min-width:52px; padding:6px 10px; border:1px solid rgba(232,220,196,.35);
+      background:rgba(11,18,20,.35); border-radius:2px;
+    }
+    .chip[aria-pressed="true"] { border-color:var(--glint); color:var(--glint); }
+    .chip.held { border-color:var(--held); color:var(--held); background:rgba(201,228,216,.08); }
+    #hold-size {
+      width:100%; min-height:48px; margin-top:12px; border:1px solid var(--ember); background:var(--ember);
+      color:#1a120c; font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:13px;
+    }
+    #hold-size.pressed { transform:translateY(2px); box-shadow:inset 0 3px 0 rgba(0,0,0,.28); filter:brightness(.86); }
+    #hold-size.mash { background:#8a3d2c; border-color:#8a3d2c; color:var(--paper); box-shadow:4px 4px 0 rgba(196,92,74,.45), inset 0 3px 0 rgba(0,0,0,.28); }
+    .agent-promise { display:inline-block; margin-top:8px; border:1px solid var(--ash); border-radius:99px; padding:3px 7px; color:var(--ash); background:rgba(13,22,23,.9); font-size:10px; letter-spacing:.08em; text-transform:uppercase; }
+    #hold-note { min-height:36px; margin:10px 0 0; color:var(--muted); font-size:12px; }
+    .aisle-note { position:absolute; z-index:3; left:14px; bottom:12px; margin:0; padding:6px 10px; border:1px solid var(--line); background:rgba(11,18,20,.88); color:var(--muted); font-size:12px; }
+    .busywork-caption { margin:12px 0 -2px; color:var(--muted); font-size:11px; letter-spacing:.06em; text-transform:uppercase; }
+    .recs { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:8px; margin-top:12px; }
+    .rec { min-height:72px; border:1px solid #2c3c3a; border-radius:4px; padding:10px; background:#12181a; color:var(--muted); font-size:12px; animation:drift 3.4s ease-in-out infinite alternate; }
+    .rec:nth-child(2) { animation-delay:-.8s; } .rec:nth-child(3) { animation-delay:-1.6s; } .rec:nth-child(4) { animation-delay:-2.4s; }
+    .rec strong { display:block; color:var(--paper); font-size:13px; font-weight:600; }
+    .recs.dim .rec { animation:none; opacity:.4; }
+    .tickers { display:grid; gap:6px; margin-top:10px; overflow:hidden; }
+    .ticker { border:1px solid #2c3c3a; background:#101618; padding:8px 0; font-size:12px; color:var(--muted); }
+    .ticker-track { display:inline-block; padding-left:100%; white-space:nowrap; animation:marquee 22s linear infinite; }
+    .ticker-still .ticker-track { animation:none; padding-left:12px; }
+    .rail { display:grid; align-content:start; gap:16px; }
+    .rail section { padding:16px; }
+    h2 { margin-top:0; font-size:14px; letter-spacing:.08em; text-transform:uppercase; color:var(--ash); }
+    .promise-card dl { display:grid; grid-template-columns:1fr auto; gap:10px 14px; margin:0; }
+    dt { color:var(--muted); } dd { margin:0; text-align:right; }
+    .receipt-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .trust-legend { margin:0 0 10px; color:var(--muted); font-size:12px; }
+    #receipts { display:grid; gap:9px; max-height:430px; overflow:auto; padding-right:2px; }
+    .receipt { border-left:3px solid var(--line); padding:8px 9px; background:#101618; font-size:12px; }
+    .receipt.shed { border-color:var(--glint); } .receipt.refusal { border-color:var(--mash); } .receipt.agent { border-color:var(--ash); background:rgba(58,91,84,.28); }
+    .receipt time { color:var(--muted); float:right; } .receipt p { margin:5px 0; }
+    .trust { color:var(--muted); margin:0; font-size:11px; }
+    .mixer { grid-column:1/-1; padding:16px; display:grid; grid-template-columns:1.4fr 1fr; gap:18px; }
+    .mixer h2 { margin-bottom:12px; }
+    .control-row { display:flex; align-items:center; gap:10px; margin:9px 0; }
+    .control-row label { min-width:86px; color:var(--muted); }
+    input[type="range"] { width:100%; accent-color:var(--ember); }
+    .scale { display:flex; justify-content:space-between; padding-left:96px; color:var(--muted); font-size:10px; }
+    .switch { display:flex; align-items:center; gap:10px; margin:17px 0 10px; }
+    .switch input { inline-size:20px; block-size:20px; accent-color:var(--ash); }
+    .button { border:1px solid #6d8a84; border-radius:4px; background:#1a2828; padding:8px 10px; }
+    #tap { width:100%; margin-top:6px; min-height:44px; }
+    #tap-note { color:var(--muted); font-size:12px; min-height:18px; margin:8px 0 0; }
+    @keyframes drift { to { transform:translateX(10px); opacity:.7; } }
+    @keyframes marquee { to { transform:translateX(-100%); } }
+    @media (prefers-reduced-motion:reduce) {
+      .rec, .ticker-track { animation:none !important; }
+      .recs.dim .rec { opacity:.4; }
+      .ticker-track { padding-left:12px; }
+    }
+    @media (max-width:980px) {
+      main { grid-template-columns:1fr; }
+      .mixer { grid-template-columns:1fr; }
+          .product-card { grid-template-columns:1fr; margin:16px 16px 40px; }
+          .stub { padding-left:0; border-left:0; padding-top:12px; border-top:2px dashed rgba(232,220,196,.28); }
+    }
+    @media (max-width:620px) {
+      .shell { width:min(100% - 20px, 1500px); }
+      .topbar { align-items:flex-start; flex-wrap:wrap; }
+      .promise-line { order:3; width:100%; }
+      .recs { grid-template-columns:1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <strong class="brand">Kiln Street</strong>
+      <span class="air"><i class="pip"></i>Tonight only</span>
+      <p class="promise-line"><small>the promise</small><span id="promise-sentence">Clicks under 100 ms. Hold my size stays.</span></p>
+      <span id="webmcp-status" class="badge warn">checking tools</span>
+    </header>
+
+    <main>
+      <section class="stage" aria-labelledby="protected-title">
+        <p class="eyebrow" id="protected-title">what's protected</p>
+        <div class="aisle">
+          <canvas id="aisle-shimmer" aria-hidden="true"></canvas>
+          <article class="product-card" id="product-card">
+            <div>
+              <span class="flash">One-piece flash</span>
+              <svg class="bowl" viewBox="0 0 240 168" role="img" aria-label="Sea-ash bowl">
+                <ellipse cx="120" cy="148" rx="78" ry="10" fill="rgba(0,0,0,.35)"/>
+                <path d="M42 78c8 46 40 62 78 62s70-16 78-62c-18 14-48 20-78 20s-60-6-78-20z" fill="#5d7874"/>
+                <path d="M48 76c10 36 36 50 72 50s62-14 72-50c-16 10-42 16-72 16s-56-6-72-16z" fill="#7a9b96"/>
+                <ellipse cx="120" cy="72" rx="86" ry="22" fill="#3f5553"/>
+                <ellipse cx="120" cy="70" rx="70" ry="16" fill="#9bb7b2"/>
+                <ellipse cx="108" cy="66" rx="22" ry="6" fill="rgba(232,220,196,.28)"/>
+              </svg>
+              <h1>Sea-ash bowl</h1>
+              <p class="price">$42</p>
+              <p class="meta">Invented stock. Local hold only. No bag, no till, no queue.</p>
+            </div>
+            <div class="stub">
+              <div>
+                <p class="eyebrow" id="size-label">Size</p>
+                <div class="chips" id="size-chips" role="group" aria-labelledby="size-label">
+                  <button class="chip" id="size-6" type="button" aria-pressed="false">6 inch</button>
+                  <button class="chip" id="size-8" type="button" aria-pressed="false">8 inch</button>
+                  <button class="chip" id="size-10" type="button" aria-pressed="false">10 inch</button>
+                </div>
+              </div>
+              <div>
+                <button id="hold-size" type="button">Hold my size</button>
+                <span id="agent-promise-marker" class="agent-promise" hidden>agent promise active</span>
+                <p id="hold-note" aria-live="polite">Pick a size, then hold it. A late tap leaves the chip unflipped.</p>
+              </div>
+            </div>
+          </article>
+          <p class="aisle-note" id="aisle-readout">Aisle shimmer at full sparkle</p>
+        </div>
+        <p class="busywork-caption">Side pieces: first to go.</p>
+        <div class="recs" id="recs-rail" aria-label="Invented sibling pieces">
+          <article class="rec"><strong>River-slip cup</strong>Shelf neighbor</article>
+          <article class="rec"><strong>Night-kiln plate</strong>Same firing</article>
+          <article class="rec"><strong>Fog-rim pitcher</strong>Same clay body</article>
+          <article class="rec"><strong>Quarry spoon rest</strong>Beside the bowl</article>
+        </div>
+        <p class="busywork-caption">Passing chatter: first to go.</p>
+        <div class="tickers" id="looking-ticker" aria-label="Looking ticker and review marquee">
+          <div class="ticker"><span class="ticker-track">Ada is looking · Jun is looking · Rio is looking · Sable is looking · Nori is looking · Ada is looking · Jun is looking · Rio is looking</span></div>
+          <div class="ticker"><span class="ticker-track">The glaze caught the window light. — S. · Sits the shelf without a wobble. — K. · Kept the 8-inch in mind. — L. · Quiet piece. — M.</span></div>
+        </div>
+      </section>
+
+      <aside class="rail">
+        <section class="promise-card" id="promise-card">
+          <h2>the promise</h2>
+          <dl>
+            <dt>Ceiling</dt><dd id="ceiling">100 ms</dd>
+            <dt>Protected</dt><dd id="protected-value">Hold my size</dd>
+            <dt>State</dt><dd id="promise-state">on</dd>
+            <dt>Your click</dt><dd id="click-readout">awaiting a click</dd>
+          </dl>
+        </section>
+        <section id="receipt-rail">
+          <div class="receipt-head"><h2>what happened</h2><span id="receipt-count" class="badge">0</span></div>
+          <p class="trust-legend">Trust line: your click versus rejected id 0.</p>
+          <div id="receipts" aria-live="polite"><p class="trust">No receipt yet.</p></div>
+        </section>
+      </aside>
+
+      <section class="mixer" aria-label="Busywork and contrast">
+        <div>
+          <h2>busywork</h2>
+          <div class="control-row">
+            <label for="busywork">Aisle load</label>
+            <input id="busywork" type="range" min="0" max="100" value="0">
+            <output id="busywork-value">0%</output>
+          </div>
+          <div class="scale" aria-hidden="true"><span>idle</span><span>find the cliff</span><span>too much</span></div>
+          <p id="busy-note" aria-live="polite">Idle. Drag toward too much when you want the aisle to drown the tap.</p>
+        </div>
+        <div>
+          <label class="switch"><input id="promise-toggle" type="checkbox" checked><span>Promise on</span></label>
+          <button id="tap" class="button" type="button">Tap to measure</button>
+          <p id="tap-note" aria-live="polite">A real click gives this page something honest to read.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../src/loadshed.js"></script>
+  <script src="../src/sale-lateness.js"></script>
+  <script>
+    (() => {
+      'use strict';
+      const $ = (selector) => document.querySelector(selector);
+      const ui = {
+        stage: $('.stage'), shimmer: $('#aisle-shimmer'), recs: $('#recs-rail'), ticker: $('#looking-ticker'),
+        busywork: $('#busywork'), busyworkValue: $('#busywork-value'), aisleReadout: $('#aisle-readout'), busyNote: $('#busy-note'),
+        promiseToggle: $('#promise-toggle'), promiseSentence: $('#promise-sentence'), promiseState: $('#promise-state'), protectedValue: $('#protected-value'),
+        webmcp: $('#webmcp-status'), ceiling: $('#ceiling'), click: $('#click-readout'), receipts: $('#receipts'),
+        receiptCount: $('#receipt-count'), agentPromiseMarker: $('#agent-promise-marker'), hold: $('#hold-size'), holdNote: $('#hold-note'), tap: $('#tap'), tapNote: $('#tap-note'),
+        chips: { 6: $('#size-6'), 8: $('#size-8'), 10: $('#size-10') }
+      };
+      const sizes = [6, 8, 10];
+      const holdState = { selected: null, held: null, mash: 0, promiseOn: true, maxInteractionLatencyMs: 100 };
+      function syncPromiseUi(promise) {
+        if (!promise) return;
+        holdState.promiseOn = promise.active;
+        holdState.maxInteractionLatencyMs = promise.maxInteractionLatencyMs;
+        ui.promiseToggle.checked = promise.active;
+        ui.ceiling.textContent = `${promise.maxInteractionLatencyMs} ms`;
+        ui.protectedValue.textContent = promise.protectedLabel;
+        ui.promiseState.textContent = promise.active ? 'on' : 'off';
+        ui.promiseSentence.textContent = promise.active
+          ? `Clicks under ${promise.maxInteractionLatencyMs} ms. ${promise.protectedLabel} stays.`
+          : 'Full fidelity held. Compare the same load.';
+      }
+      const shimmerState = { count: 480, burnMs: 320 };
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const sparkPoints = Array.from({ length: 480 }, (_, index) => ({
+        x: (index * 47 % 997) / 997,
+        y: (index * 89 % 991) / 991,
+        speed: .00003 + (index % 11) * .000004,
+        size: .55 + (index % 5) * .22
+      }));
+      const shimmerContext = ui.shimmer.getContext('2d');
+      const formatMs = (value) => Number.isFinite(value) ? `${Math.round(value)} ms` : 'awaiting a click';
+      const formatInteraction = (interaction) => interaction?.trust === 'page-measured'
+        ? interaction.label
+        : formatMs(interaction?.durationMs);
+
+      function fit(canvas, context) {
+        const rect = canvas.getBoundingClientRect();
+        const ratio = Math.min(devicePixelRatio || 1, 2);
+        const width = Math.max(1, Math.round(rect.width * ratio));
+        const height = Math.max(1, Math.round(rect.height * ratio));
+        if (canvas.width !== width || canvas.height !== height) {
+          canvas.width = width;
+          canvas.height = height;
+          context.setTransform(ratio, 0, 0, ratio, 0, 0);
+        }
+        return rect;
+      }
+
+      function drawShimmer(time) {
+        const rect = fit(ui.shimmer, shimmerContext);
+        shimmerContext.clearRect(0, 0, rect.width, rect.height);
+        shimmerContext.fillStyle = shimmerState.count === 48 ? 'rgba(232,184,109,.28)' : 'rgba(232,184,109,.62)';
+        for (let index = 0; index < shimmerState.count; index += 1) {
+          const point = sparkPoints[index];
+          shimmerContext.beginPath();
+          shimmerContext.arc(((point.x + time * point.speed) % 1) * rect.width, point.y * rect.height, point.size, 0, Math.PI * 2);
+          shimmerContext.fill();
+        }
+      }
+
+      function burnAisle() {
+        const pressure = Number(ui.busywork.value);
+        if (pressure < 35) return;
+        const normalized = (pressure - 35) / 65;
+        const end = performance.now() + normalized * shimmerState.burnMs;
+        let work = 0;
+        while (performance.now() < end) work = (work + Math.sqrt(work + 17.31)) % 997;
+        ui.shimmer.dataset.work = work.toFixed(2);
+      }
+
+      function frame(time) {
+        drawShimmer(time);
+        burnAisle();
+        if (!reduceMotion) requestAnimationFrame(frame);
+      }
+
+      function chipLabel(size, held) {
+        return held ? `${size} inch · Held` : `${size} inch`;
+      }
+
+      function renderChips() {
+        for (const size of sizes) {
+          const chip = ui.chips[size];
+          const isHeld = holdState.held === size;
+          const isSelected = holdState.selected === size;
+          chip.textContent = chipLabel(size, isHeld);
+          chip.classList.toggle('held', isHeld);
+          chip.setAttribute('aria-pressed', String(isSelected || isHeld));
+        }
+      }
+
+      function setHoldVisual(mode) {
+        ui.hold.classList.toggle('pressed', mode === 'pressed' || mode === 'mash');
+        ui.hold.classList.toggle('mash', mode === 'mash');
+      }
+
+      function renderReceipt(receipt) {
+        if (ui.receipts.firstElementChild && ui.receipts.firstElementChild.matches('p.trust')) ui.receipts.firstElementChild.remove();
+        const old = ui.receipts.querySelector(`[data-receipt-id="${receipt.id}"]`);
+        if (old) old.remove();
+        const card = document.createElement('article');
+        card.className = `receipt ${receipt.kind}${receipt.caller === 'webmcp-agent' ? ' agent' : ''}`;
+        card.dataset.receiptId = receipt.id;
+        const title = document.createElement('strong');
+        title.textContent = receipt.caller === 'webmcp-agent' ? `${receipt.kind} · agent` : receipt.kind;
+        const when = document.createElement('time');
+        when.dateTime = receipt.atIso;
+        when.textContent = receipt.atIso.slice(11, 19);
+        const text = document.createElement('p');
+        text.textContent = receipt.summary;
+        const trust = document.createElement('p');
+        trust.className = 'trust';
+        if (receipt.interaction?.trust === 'trusted-user') trust.textContent = `your click · interaction ${receipt.interaction.interactionId}`;
+        else if (receipt.interaction?.trust === 'untrusted-injected-rejected') trust.textContent = 'rejected injected click · id 0';
+        else if (receipt.interaction?.trust === 'before-sample-uncaptured') trust.textContent = 'waiting for a real click after the cut';
+        else trust.textContent = receipt.evidenceGaps?.[0] || 'page record';
+        card.append(title, when, text, trust);
+        ui.receipts.prepend(card);
+        while (ui.receipts.children.length > 24) ui.receipts.lastElementChild.remove();
+      }
+
+      const runtime = Loadshed.create({
+        elements: [
+          { id: 'hold-size', label: 'Hold my size', neverShed: true },
+          { id: 'product-card', label: 'Product card', neverShed: true },
+          { id: 'size-chips', label: 'Size chips', neverShed: true },
+          { id: 'promise-card', label: 'Promise card', neverShed: true },
+          { id: 'receipt-rail', label: 'What happened', neverShed: true },
+          { id: 'hold-note', label: 'Hold status' },
+          { id: 'busywork', label: 'Busywork', protectable: false },
+          { id: 'aisle-shimmer', label: 'aisle shimmer' },
+          { id: 'recs-rail', label: 'recs rail' },
+          { id: 'looking-ticker', label: 'looking ticker' }
+        ],
+        pressureControlId: 'busywork',
+        interactionPrompt: 'Ask a person to click Hold my size or Tap to measure.',
+        ladder: [
+          {
+            id: 'aisle-shimmer', label: 'aisle shimmer', cost: 'high', order: 1, from: 'full', to: 'hush',
+            shed: () => {
+              shimmerState.count = 48;
+              shimmerState.burnMs = 7;
+              ui.stage.classList.add('hush');
+              ui.aisleReadout.textContent = 'Aisle shimmer hush: 480 → 48';
+            },
+            restore: () => {
+              shimmerState.count = 480;
+              shimmerState.burnMs = 320;
+              ui.stage.classList.remove('hush');
+              ui.aisleReadout.textContent = 'Aisle shimmer at full sparkle';
+            }
+          },
+          {
+            id: 'recs-rail', label: 'recs rail', cost: 'medium', order: 2, from: 'moving', to: 'dim', measuredRelief: false,
+            shed: () => { ui.recs.classList.add('dim'); ui.busyNote.textContent = 'Recs still and dim. Product card untouched.'; },
+            restore: () => { ui.recs.classList.remove('dim'); ui.busyNote.textContent = 'Recs drifting again.'; }
+          },
+          {
+            id: 'looking-ticker', label: 'looking ticker', cost: 'low', order: 3, from: 'moving', to: 'still', measuredRelief: false,
+            shed: () => { ui.ticker.classList.add('ticker-still'); ui.busyNote.textContent = 'Looking ticker still. The words stayed.'; },
+            restore: () => { ui.ticker.classList.remove('ticker-still'); ui.busyNote.textContent = 'Looking ticker moving again.'; }
+          }
+        ],
+        onReceipt: renderReceipt,
+        onState: (state) => {
+          syncPromiseUi(state.promise);
+          ui.receiptCount.textContent = `${state.receipts.length} event${state.receipts.length === 1 ? '' : 's'}`;
+          const latest = state.receipts.find((item) => item.kind === 'measurement')?.interaction;
+          if (latest?.trust === 'trusted-user') ui.click.textContent = formatMs(latest.afterMs || latest.beforeMs);
+          else if (state.interaction.latestTrusted) ui.click.textContent = formatInteraction(state.interaction.latestTrusted);
+          else if (state.interaction.trustedCount) ui.click.textContent = 'a click was seen';
+          else if (state.interaction.rawCount) ui.click.textContent = `0 trusted of ${state.interaction.rawCount} raw`;
+          ui.agentPromiseMarker.hidden = !(state.promise?.active && state.promise?.caller === 'webmcp-agent');
+          if (state.registration.status === 'registered') { ui.webmcp.textContent = 'tools ready'; ui.webmcp.className = 'badge good'; }
+          else if (state.registration.status === 'skipped') { ui.webmcp.textContent = 'tools skipped in iframe'; ui.webmcp.className = 'badge warn'; }
+          else if (state.registration.status === 'unsupported') { ui.webmcp.textContent = 'tools unavailable'; ui.webmcp.className = 'badge warn'; }
+          else if (state.registration.status === 'error') { ui.webmcp.textContent = 'tool check failed'; ui.webmcp.className = 'badge warn'; }
+        }
+      }).start();
+
+      const initialContract = runtime.setContract({ maxInteractionLatencyMs: 100, protectedElement: 'hold-size', active: true }, 'page-control');
+      if (!initialContract.ok) { ui.promiseToggle.checked = false; ui.promiseState.textContent = 'unavailable'; ui.promiseSentence.textContent = initialContract.summary; }
+
+      for (const size of sizes) {
+        ui.chips[size].addEventListener('click', () => {
+          holdState.selected = size;
+          renderChips();
+          if (!holdState.held) ui.holdNote.textContent = `${size} inch selected. Hold my size to keep it.`;
+        });
+      }
+
+      ui.hold.addEventListener('click', (event) => {
+        runtime.recordPageMeasuredClick(event);
+        const handlerAt = performance.now();
+        const handlerDelayMs = SaleLateness.handlerDelayMs(event.timeStamp, handlerAt);
+        if (handlerDelayMs > holdState.maxInteractionLatencyMs) {
+          holdState.mash += 1;
+          setHoldVisual('mash');
+          ui.holdNote.textContent = holdState.mash === 1
+            ? `Nothing confirmed. The page reached this tap ${Math.round(handlerDelayMs)} ms late; the chip stayed unflipped.`
+            : `Mash ${holdState.mash}. The page reached this tap ${Math.round(handlerDelayMs)} ms late; the chip stayed unflipped.`;
+          return;
+        }
+        if (holdState.selected == null) {
+          setHoldVisual('pressed');
+          ui.holdNote.textContent = 'Pick 6, 8, or 10 first.';
+          setTimeout(() => { if (holdState.held == null) setHoldVisual('idle'); }, 280);
+          return;
+        }
+        holdState.held = holdState.selected;
+        holdState.mash = 0;
+        setHoldVisual('pressed');
+        renderChips();
+        ui.holdNote.textContent = `${holdState.held}-inch is held on this page only. No bag, no till.`;
+      });
+
+      ui.busywork.addEventListener('input', () => {
+        const value = Number(ui.busywork.value);
+        ui.busyworkValue.textContent = `${ui.busywork.value}%`;
+        runtime.setBusyworkLevel(ui.busywork.value, 'page-control');
+        ui.busyNote.textContent = value >= 70 && holdState.promiseOn
+          ? 'Watching the aisle load'
+          : value >= 70
+            ? 'Full fidelity held. Compare the same load.'
+            : 'Idle. Drag toward too much when you want the aisle to drown the tap.';
+      });
+
+      ui.promiseToggle.addEventListener('change', () => {
+        const active = ui.promiseToggle.checked;
+        const result = runtime.setContract({ maxInteractionLatencyMs: holdState.maxInteractionLatencyMs, protectedElement: 'hold-size', active }, 'page-control');
+        if (!result.ok) {
+          ui.promiseToggle.checked = false;
+          ui.promiseState.textContent = 'unavailable';
+          ui.promiseSentence.textContent = result.summary;
+          return;
+        }
+        if (active) {
+          if (holdState.held == null) {
+            holdState.mash = 0;
+            setHoldVisual('idle');
+            ui.holdNote.textContent = holdState.selected == null
+              ? 'Promise on. Pick a size, then hold it.'
+              : `${holdState.selected} inch selected. Hold my size to keep it.`;
+          }
+        } else if (holdState.held == null) {
+          ui.holdNote.textContent = `Promise off. A tap that reaches this handler within ${holdState.maxInteractionLatencyMs} ms can still hold the size.`;
+        }
+      });
+
+      ui.tap.addEventListener('click', (event) => {
+        runtime.recordPageMeasuredClick(event);
+        ui.tap.textContent = 'Tap received';
+        ui.tapNote.textContent = 'Your real click is available for the next measurement.';
+        setTimeout(() => { ui.tap.textContent = 'Tap to measure'; }, 550);
+      });
+
+      renderChips();
+      window.addEventListener('resize', () => drawShimmer(performance.now()));
+      if (reduceMotion) drawShimmer(performance.now()); else requestAnimationFrame(frame);
+    })();
+  </script>
+</body>
+</html>

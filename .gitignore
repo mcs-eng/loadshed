@@ -1,0 +1,2 @@
+# Raw local agent and build-session transcripts are not project source.
+tournament/logs/*.log

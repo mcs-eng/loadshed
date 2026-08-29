@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Choose your floor</title>
+  <style>
+    :root { --ink:#e7e2d6; --muted:#9aa39a; --line:#3a433f; --panel:#141a18; --soot:#0c100f; --tick:#c9a36a; }
+    * { box-sizing:border-box; }
+    body {
+      margin:0; min-width:320px; color:var(--ink);
+      font:16px/1.5 "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+      background:
+        linear-gradient(180deg, rgba(201,163,106,.08), transparent 18rem),
+        var(--soot);
+    }
+    a:focus-visible { outline:3px solid var(--tick); outline-offset:4px; }
+    .shell { width:min(960px, calc(100% - 32px)); margin:auto; padding:48px 0 64px; }
+    .eyebrow { margin:0; color:var(--tick); font-size:12px; letter-spacing:.16em; text-transform:uppercase; }
+    h1 { margin:8px 0 12px; font-family:Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif; font-size:clamp(34px, 6vw, 56px); font-weight:500; letter-spacing:-.02em; }
+    .shared { max-width:38rem; margin:0 0 28px; color:var(--muted); }
+    .floors {
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+      gap:14px;
+      align-items:stretch;
+    }
+    .floor {
+      display:flex; flex-direction:column; justify-content:space-between; gap:18px;
+      min-height:180px; padding:20px 18px; border:1px solid var(--line); background:var(--panel);
+      color:inherit; text-decoration:none;
+    }
+    .floor:hover { border-color:var(--tick); }
+    .floor strong { display:block; font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--tick); }
+    .floor p { margin:0; color:var(--ink); }
+    .floor span { color:var(--muted); font-size:13px; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <p class="eyebrow">Loadshed</p>
+    <h1>Choose your floor</h1>
+    <p class="shared">The same engine keeps a page's promise by cutting only the busywork that page registered. Each floor is a different shop. The contract does not change.</p>
+    <nav class="floors" aria-label="Floors">
+      <a class="floor" href="../">
+        <div>
+          <strong>Desk</strong>
+          <p>A live show. Keep the trace useful when the room gets loud.</p>
+        </div>
+        <span>Open desk</span>
+      </a>
+      <a class="floor" href="../sale/">
+        <div>
+          <strong>Sale</strong>
+          <p>A one-piece shop flash. Hold a size before the aisle chrome drowns the tap.</p>
+        </div>
+        <span>Open sale</span>
+      </a>
+    </nav>
+  </div>
+</body>
+</html>
