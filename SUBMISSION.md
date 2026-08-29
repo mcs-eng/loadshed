@@ -148,6 +148,35 @@ working cut appears inside eight seconds. Do not show credentials, unrelated tab
 or internal repositories. Verify the uploaded YouTube video is public, has audible narration, and
 runs under 3:00 before adding its URL to Devpost.
 
+### Teleprompter narration
+
+This is the word-for-word target for a roughly 90-second cut. The bracketed cues are not spoken.
+
+**[Result — pressured Desk]** “Here is the result. This page got slow, and the agent knew exactly
+what it could cut—and what it had to protect.”
+
+**[Restore to idle]** “A live control room or shopping flow knows which human task must survive.
+DOM automation does not. Loadshed publishes that priority as a WebMCP contract.”
+
+**[Show six tools; inspect and list options]** “The client discovers six page-defined tools. It can
+inspect the current promise and browser signals, list the protected work, and see the next measured
+cut—without guessing selectors.”
+
+**[Set contract; protect `mark-note`]** “Set a one-hundred-millisecond contract for Live trace, then
+protect Mixer status. The agent acts only through page-owned IDs and callbacks. The page shows both
+agent-stamped receipts.”
+
+**[Raise Crowd load; person clicks Tap]** “Now the person raises the crowd load and supplies the
+click. Loadshed measures a long frame and cuts the registered crowd work from four hundred eighty to
+forty-eight. The live trace and mixer stay useful.”
+
+**[Read receipts]** “The receipt says what changed, who caused it, which signal justified it, and
+what evidence is still missing. Injected clicks never become trusted evidence.”
+
+**[Turn promise off; flash Sale]** “Turn the promise off, and full fidelity returns. Sale uses the
+same six tools with a different page-owned priority: Hold my size. Loadshed is a small runtime for
+honest human-agent responsiveness contracts on the open web.”
+
 ## Devpost final-form map
 
 The account is already registered for the challenge. The live submission form was re-read on August
