@@ -13,8 +13,8 @@ a supported WebMCP browser, video upload, or final submission authority.
   allowlisted release history, and GitHub detects the root MIT license.
 - YouTube video — **PENDING — operator must record narration, upload publicly, and provide the URL.**
 - Devpost entry — **PUBLIC DRAFT — <https://devpost.com/software/loadshed>.** The judge-facing copy,
-  live URL, public repository, and technology list are present. The video, required submission
-  answers, explicit rules acknowledgment, and final submission are not complete.
+  live URL, public repository, technology list, and proof thumbnail are present. Registration is
+  confirmed. The video, required submission answers, and final submission are not complete.
 
 Do not publish this private repository's Git history. Raw local agent transcripts were removed from
 the current tree, but older private commits still contain them. The public repository was created
@@ -111,24 +111,63 @@ cannot provide, and record the exact browser/version and before/after interactio
 Codex run proves the deployed six-tool loop and page behavior; it does not claim that final named-
 client or human-interaction evidence.
 
-## Video plan (target 2:30)
+## Video plan (target 1:30)
 
 The final public YouTube video must be less than three minutes, include audio, show the project
 functioning, and explain how it uses WebMCP. Use no copyrighted music or unlicensed third-party
 material.
 
-- **0:00–0:20 — Problem.** “A busy page knows what matters, but an agent usually does not. Loadshed
-  lets the page publish the promise and the safe cut order.” Show the full Desk at idle.
-- **0:20–0:45 — WebMCP surface.** Ask the agent to inspect responsiveness and adaptation options.
-  Show the structured tool calls and the six-tool surface.
-- **0:45–1:15 — Shared contract.** Ask the agent to set the 100 ms `live-trace` contract. Show the
-  agent marker, synchronized promise card, and agent-stamped receipt.
-- **1:15–1:50 — Human evidence and cut.** Drag Crowd load, click Tap yourself, and show the first
-  cut plus its trust line. State that agent-injected clicks are rejected.
-- **1:50–2:10 — Reversibility.** Read receipts with the agent, turn the promise off, and show full
-  fidelity restore.
-- **2:10–2:30 — Portability and impact.** Open Sale briefly. “Same plant equipment, different
-  recipe: the page owns the protected work and the callbacks; Loadshed owns the contract.”
+- **0:00–0:08 — Show the win first.** Begin on the pressured Desk with **agent promise active**,
+  Crowd reduced 480 to 48, Live trace still moving, and the newest receipt visible. “This page got
+  slow. The agent knew exactly what it could cut—and what it had to protect.”
+- **0:08–0:20 — State the problem.** Restore to idle. “DOM automation can click things, but it
+  cannot safely infer a page owner's performance priorities. Loadshed publishes those priorities as
+  a WebMCP contract.”
+- **0:20–0:35 — Expose intent.** Show the client discovering six tools, then ask: “Inspect this
+  page's responsiveness and list its adaptation options.” Briefly show the structured promise,
+  protected IDs, measured first cut, and evidence gap.
+- **0:35–0:50 — Negotiate.** Ask: “Set a 100 millisecond contract for `live-trace`, then protect
+  `mark-note`.” Show the agent marker, synchronized card, and two agent-stamped receipts. “The agent
+  acts through page-owned IDs and callbacks, never guessed selectors.”
+- **0:50–1:08 — Person supplies evidence.** Drag Crowd load to 100 and click Tap yourself. Hold on
+  the 480-to-48 cut and trusted timing line. “The person supplies the click. Loadshed rejects
+  injected ID-zero evidence and records any gap instead of inventing a win.”
+- **1:08–1:20 — Audit and reverse.** Ask for intervention receipts, then turn the promise off.
+  Show full fidelity restore. “Every cut, refusal, restore, and override is visible and reversible.”
+- **1:20–1:30 — Prove portability.** Flash Sale with its **Hold my size** promise. “Same six tools,
+  different page-owned priorities. Loadshed is a small runtime for human-agent responsiveness
+  contracts on the open web.” End on the live URL and public repository.
+
+Recording notes: use one continuous browser window at 1080p, enlarge the agent tool-result panel
+enough to read the tool names, keep the page and receipt rail visible, and rehearse once so the first
+working cut appears inside eight seconds. Do not show credentials, unrelated tabs, browser profiles,
+or internal repositories. Verify the uploaded YouTube video is public, has audible narration, and
+runs under 3:00 before adding its URL to Devpost.
+
+## Devpost final-form map
+
+The account is already registered for the challenge. The live submission form was re-read on August
+29, 2026; these IDs and answers are a handoff, not a submitted entry.
+
+| Field | Prepared answer or operator boundary |
+| --- | --- |
+| `28249` Submitter Type | **OPERATOR:** choose Individual, Team of Individuals, or Organization. |
+| `28250` Country of residence | **OPERATOR:** select the actual country for every submitter. |
+| `28251` Organization name | Leave blank unless submitting on behalf of an organization. |
+| `28252` App Status | **New.** Development began August 26, after the challenge opened. |
+| `28253` Existing-project updates | Leave blank because the project is new. |
+| `28254` Live URL | `https://mcs-eng.github.io/loadshed/` |
+| `28255` Testing instructions | Open the root in ChatGPT's in-app browser or Chrome 149+ with WebMCP enabled; confirm **tools ready**; inspect responsiveness and options; set a 100 ms `live-trace` contract; protect `mark-note`; move Crowd load to 100%; click Tap yourself; wait for Crowd 480 to 48; compare the visible rail with `get_intervention_receipts`; turn the promise off; repeat on Sale with `hold-size` and `hold-note`. No credentials are required. |
+| `28256` Public code repository | `https://github.com/mcs-eng/loadshed` |
+| `28257` Tested clients | Codex in-app browser: live six-tool Desk and Sale qualification. Edge 152: runtime and reduced-motion smoke, not a WebMCP-agent qualification. **Update after the final ChatGPT or Chrome 149+ run.** |
+| `28258` AI tools used | OpenAI Codex, including Sol, Terra, and Luna review passes; Anthropic Claude; xAI Grok; and Agy. |
+| `28259` Learning level | **OPERATOR:** choose None, Moderate, or Significant. |
+| `28260` Career AI value | **OPERATOR:** choose Yes or No. |
+| Demo video | **OPERATOR:** paste the public narrated YouTube URL after verifying it. |
+
+Do not call final submit until every required answer and the video URL are present, the named-client
+run is recorded, and the operator has reviewed the rendered project page and explicitly authorized
+submission.
 
 ## Operator close-out checklist
 
