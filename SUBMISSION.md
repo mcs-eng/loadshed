@@ -31,11 +31,13 @@ release, rerun its tests, and verify the release hashes before pushing.
 
 ## Draft project description
 
-Loadshed gives a web page and an agent a shared, enforceable language for graceful degradation.
-Instead of an agent guessing which DOM elements are safe to remove when a page becomes sluggish,
-the page publishes a contract: the work that must remain useful, a strict interaction ceiling, and
-an ordered ladder of disposable work. The person controls the synthetic pressure and supplies the
-trusted click; the agent can inspect, negotiate, protect, adapt, and audit through six WebMCP tools.
+When a live control room or shopping flow gets slow, the page knows which human task must survive;
+an agent looking at the DOM does not. Loadshed lets the page publish that priority as a contract: the
+work that must remain useful, a strict interaction ceiling, and an ordered ladder of disposable
+work. In the deployed Desk, a measured 320 ms long frame caused the registered Crowd workload to
+drop from 480 to 48 while the live trace and mixer stayed useful, and the page showed a receipt for
+the cut. The person controls pressure and supplies the trusted click; the agent can inspect,
+negotiate, protect, adapt, and audit through six WebMCP tools.
 
 That division is the WebMCP fit. Ordinary browser automation can click controls, but it cannot know
 the page owner's intent or produce trustworthy latency evidence by clicking on its own behalf.
@@ -117,15 +119,16 @@ The final public YouTube video must be less than three minutes, include audio, s
 functioning, and explain how it uses WebMCP. Use no copyrighted music or unlicensed third-party
 material.
 
-- **0:00–0:08 — Show the win first.** Begin on the pressured Desk with **agent promise active**,
-  Crowd reduced 480 to 48, Live trace still moving, and the newest receipt visible. “This page got
-  slow. The agent knew exactly what it could cut—and what it had to protect.”
+- **0:00–0:08 — Show the win first.** Label this beat **result**, then begin on the pressured Desk
+  with **agent promise active**, Crowd reduced 480 to 48, Live trace still moving, and the newest
+  receipt visible. “Here is the result: this page got slow, and the agent knew exactly what it could
+  cut—and what it had to protect.”
 - **0:08–0:20 — State the problem.** Restore to idle. “DOM automation can click things, but it
   cannot safely infer a page owner's performance priorities. Loadshed publishes those priorities as
   a WebMCP contract.”
 - **0:20–0:35 — Expose intent.** Show the client discovering six tools, then ask: “Inspect this
   page's responsiveness and list its adaptation options.” Briefly show the structured promise,
-  protected IDs, measured first cut, and evidence gap.
+  protected IDs, next measured cut, and evidence gap.
 - **0:35–0:50 — Negotiate.** Ask: “Set a 100 millisecond contract for `live-trace`, then protect
   `mark-note`.” Show the agent marker, synchronized card, and two agent-stamped receipts. “The agent
   acts through page-owned IDs and callbacks, never guessed selectors.”
