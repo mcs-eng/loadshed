@@ -6,13 +6,15 @@ a supported WebMCP browser, video upload, or final submission authority.
 ## Current submission state
 
 - Source tree and local tests — **READY — 34/34 Node tests pass.**
-- Live URL — **DEPLOYED — <https://mcs-eng.github.io/loadshed/>.** Anonymous HTTPS checks and an
-  Edge 152 smoke passed on August 29, 2026; real WebMCP-agent qualification is still pending.
+- Live URL — **DEPLOYED AND WEBMCP-QUALIFIED — <https://mcs-eng.github.io/loadshed/>.** Anonymous
+  HTTPS checks, an Edge 152 smoke, and a live Codex in-app-browser WebMCP run passed on August 29,
+  2026. A final confirmation in the rules-named ChatGPT in-app browser or Chrome 149+ remains.
 - Public repository — **PUBLIC — <https://github.com/mcs-eng/loadshed>.** It contains only the
   allowlisted release history, and GitHub detects the root MIT license.
 - YouTube video — **PENDING — operator must record narration, upload publicly, and provide the URL.**
-- Devpost entry — **PRE-DRAFT — project 1400258 exists; copy, video, required answers, and final
-  submission are not yet complete.**
+- Devpost entry — **PUBLIC DRAFT — <https://devpost.com/software/loadshed>.** The judge-facing copy,
+  live URL, public repository, and technology list are present. The video, required submission
+  answers, explicit rules acknowledgment, and final submission are not complete.
 
 Do not publish this private repository's Git history. Raw local agent transcripts were removed from
 the current tree, but older private commits still contain them. The public repository was created
@@ -73,6 +75,42 @@ with the WebMCP testing flag enabled. Keep the agent and person roles separate.
 Record the deployed URL, browser/version, date, six-tool count, exact source commit, and any evidence
 gap. Endpoint compatibility alone is not a qualification result.
 
+## Qualification receipt — August 29, 2026
+
+This was a live WebMCP run against the deployed site, not a registration mock or endpoint probe.
+The client was Codex's in-app browser. The qualified product release was public commit `93f8d1a`;
+the Desk and Sale product files in that release are identical to private source commit `5adee9d`.
+
+- **Discovery:** after visiting each page, the client discovered exactly six tools:
+  `inspect_responsiveness`, `get_adaptation_options`, `set_smoothness_contract`,
+  `protect_experience_element`, `apply_adaptation`, and `get_intervention_receipts`.
+- **Desk:** the agent activated a 100 ms `live-trace` contract and protected the eligible
+  `mark-note` target. At 100% person-controlled Crowd load, a `long-animation-frame` signal produced
+  a measured automatic cut from Crowd 480 to 48. The cut receipt recorded a 320.157 ms frame and
+  stated that Live trace was untouched. Structured inspection, visible state, and newest-first
+  receipts agreed.
+- **Sale:** the agent activated a 100 ms `hold-size` contract and protected `hold-note`. At 100%
+  person-controlled Aisle load, the measured step changed aisle shimmer from 480 to 48 while Hold my
+  size remained protected. The live frame signal was about 320.4 ms, and structured receipts agreed
+  with the visible Sale state.
+- **Safety and reversibility:** the Desk refused an attempt to pin its last measured-relief step
+  while the promise was active. Both eligible non-ladder protection targets could be protected and
+  released. Clearing pressure restored the cut, and turning each contract off restored full
+  fidelity with an agent-stamped override receipt.
+- **Honest boundary:** browser-controlled activation of Tap to measure did not create a trusted
+  interaction sample. The runtime kept `rawCount` and `trustedCount` at zero and continued to ask
+  for a person-supplied click; it did not invent before/after evidence.
+
+Two credential-free full-page screenshots were captured during the live cuts. One shows the Desk's
+agent contract, protected trace, 480-to-48 cut, agent receipts, and explicit request for a real click;
+the other shows the equivalent Sale proof.
+
+Remaining qualification work is deliberately narrow: repeat the run in one client named by the
+official rules (ChatGPT's in-app browser or Chrome 149+), supply the physical click that the agent
+cannot provide, and record the exact browser/version and before/after interaction evidence. The
+Codex run proves the deployed six-tool loop and page behavior; it does not claim that final named-
+client or human-interaction evidence.
+
 ## Video plan (target 2:30)
 
 The final public YouTube video must be less than three minutes, include audio, show the project
@@ -99,11 +137,12 @@ material.
   only sanitized history is reachable.
 - [x] Make `LICENSE` detectable in the repository About panel.
 - [x] Choose a static host and deploy the exact reviewed source commit.
-- [ ] Complete the hosted qualification above and record its receipt.
-- [ ] Capture screenshots without credentials, private data, browser profiles, or unrelated tabs.
+- [x] Complete a live hosted six-tool qualification and record its bounded receipt.
+- [x] Capture screenshots without credentials, private data, browser profiles, or unrelated tabs.
+- [ ] Repeat the qualification in ChatGPT's in-app browser or Chrome 149+ with a physical click.
 - [ ] Record, edit, and publicly upload the narrated video; verify runtime is less than 3:00.
 - [ ] Replace the remaining YouTube placeholder with the public video URL.
-- [ ] Paste and review the project description in Devpost.
+- [x] Publish and review the project description in the Devpost draft.
 - [ ] Submit before September 3, 2026 at 1:00 PM Pacific, then preserve the submitted artifacts
   through judging.
 

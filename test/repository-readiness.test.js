@@ -23,6 +23,10 @@ test('submission handoff records published artifacts without overstating operato
   assert.match(handoff, /Live URL.*https:\/\/mcs-eng\.github\.io\/loadshed\//i);
   assert.match(handoff, /Public repository.*https:\/\/github\.com\/mcs-eng\/loadshed/i);
   assert.match(handoff, /YouTube video.*PENDING/i);
+  assert.match(handoff, /Devpost entry.*PUBLIC DRAFT.*https:\/\/devpost\.com\/software\/loadshed/i);
+  assert.match(handoff, /Qualification receipt.*August 29, 2026/i);
+  assert.match(handoff, /qualified product release was public commit `93f8d1a`/i);
+  assert.match(handoff, /ChatGPT's in-app browser or Chrome 149\+/i);
   assert.match(handoff, /do not publish this private repository's Git history/i);
   assert.match(handoff, /less than three minutes/i);
   assert.match(handoff, /set_smoothness_contract/);

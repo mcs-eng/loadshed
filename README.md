@@ -8,6 +8,10 @@ measurement leaves a plain-language receipt.
 **Live demo:** [mcs-eng.github.io/loadshed](https://mcs-eng.github.io/loadshed/) ·
 **Public source:** [github.com/mcs-eng/loadshed](https://github.com/mcs-eng/loadshed)
 
+The deployed Desk and Sale have each completed a live six-tool WebMCP run. See the
+[dated qualification receipt](SUBMISSION.md#qualification-receipt--august-29-2026) for the exact
+client, release, measured cuts, safety checks, and remaining human-evidence boundary.
+
 The flagship demo is the site root: **Hold the Line**, a live-show desk that protects its trace and
 controls while synthetic crowd work loads the main thread. The [Sale demo](sale/) proves that the
 same runtime can protect a different page-owned task without learning that page's DOM. The
