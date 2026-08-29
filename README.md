@@ -57,7 +57,7 @@ node --test test\*.test.js
 
 | Tool | Changes state | Purpose |
 | --- | --- | --- |
-| `inspect_responsiveness` | No | Read the promise, signals, pressure, trust diagnosis, pins, and next cut. |
+| `inspect_responsiveness` | No | Read the promise, signals, pressure, trust diagnosis, pins, and next automatic cut. |
 | `get_adaptation_options` | No | List protected work, eligible protection targets, and the validated shed ladder. |
 | `set_smoothness_contract` | Yes | Set a strict 50–200 ms ceiling, protected element, and active state. |
 | `protect_experience_element` | Yes | Protect or release an eligible declared element. |

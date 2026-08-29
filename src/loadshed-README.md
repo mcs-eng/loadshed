@@ -98,7 +98,7 @@ When `document.modelContext.registerTool` is present, `.start()` registers these
 
 | Tool | Mode | Purpose |
 | --- | --- | --- |
-| `inspect_responsiveness` | read-only | Promise, browser signals, trust diagnosis, pins, and next available cut. `windowMs` is 500–15000 ms. |
+| `inspect_responsiveness` | read-only | Promise, browser signals, trust diagnosis, pins, and `nextAutomaticStepId`. `windowMs` is 500–15000 ms. |
 | `get_adaptation_options` | read-only | Declared protected IDs, eligible protection targets, the validated ladder, and the human-only pressure control. |
 | `set_smoothness_contract` | mutation | Sets the 50–200 ms ceiling, declared protected element, and optional `active` state. |
 | `protect_experience_element` | mutation | Protects or releases one declared element. |

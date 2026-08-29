@@ -193,6 +193,9 @@ test('an agent-protected non-ladder element can back a contract while a ladder t
   const refusal = seam.setSmoothnessContract({ maxInteractionLatencyMs: 100, protectedElement: 'crowd', active: true });
   assert.equal(refusal.ok, false);
   assert.match(refusal.summary, /pin or remove the step/i);
+  const ladderProtection = seam.protectExperienceElement({ elementId: 'crowd', protect: true });
+  assert.equal(ladderProtection.ok, false);
+  assert.match(ladderProtection.summary, /busywork.*pin it instead/i);
   assert.equal(seam.getSnapshot().receipts[0].kind, 'refusal');
   runtime.stop();
 });
@@ -253,7 +256,8 @@ test('a non-shedable step refuses manual cuts and is skipped by the controller',
   const manual = seam.applyAdaptation({ stepId: 'fixed', action: 'shed' });
   assert.equal(manual.ok, false);
   assert.match(manual.summary, /not shedable/i);
-  assert.equal(seam.inspect().shed.nextUnpinnedStepId, 'cuttable');
+  assert.equal(seam.inspect().shed.nextAutomaticStepId, 'cuttable');
+  assert.equal(Object.hasOwn(seam.inspect().shed, 'nextUnpinnedStepId'), false);
   seam.setBusyworkLevel(100);
   observer(env, 'longtask').callback({ getEntries: () => [
     { duration: 55, startTime: 1001 }, { duration: 55, startTime: 1002 }
@@ -328,6 +332,8 @@ test('the automatic controller leaves visual-only cuts for explicit agent choice
   ] });
   assert.equal(seam.getSnapshot().steps.find((step) => step.id === 'visual').currentlyShed, false);
   assert.equal(seam.adaptationOptions().ladder.find((step) => step.id === 'visual').measuredRelief, false);
+  assert.equal(seam.inspect().shed.nextAutomaticStepId, null);
+  assert.match(seam.inspect().summary, /No automatic cut remains/);
   runtime.stop();
 });
 
@@ -396,6 +402,8 @@ test('active demo surfaces honor reduced motion and expose no production test se
   assert.match(rootDeskSource, /<h1 class="brand">Hold the Line<\/h1>/);
   assert.match(rootDeskSource, /if \(reduceMotion\) tickOnce\(\); else requestAnimationFrame\(frame\)/);
   assert.match(saleSource, /if \(reduceMotion\) drawShimmer\(performance\.now\(\)\); else requestAnimationFrame\(frame\)/);
+  assert.match(saleSource, /Math\.min\(8192, Math\.max\(1, Math\.round\(rect\.width \* ratio\)\)\)/);
+  assert.match(saleSource, /Math\.min\(8192, Math\.max\(1, Math\.round\(rect\.height \* ratio\)\)\)/);
   for (const source of [rootDeskSource, saleSource]) {
     assert.match(source, /matchMedia\('\(prefers-reduced-motion: reduce\)'\)\.matches/);
     assert.doesNotMatch(source, /window\.__(?:holdTheLine|openStock)/);

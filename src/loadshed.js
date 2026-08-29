@@ -583,12 +583,12 @@
       const next = this.nextAutomaticStep();
       const summary = interactionStatus.diagnosis.startsWith('0 trusted')
         ? `The agent cannot measure clicks on this surface. ${this.interactionPrompt()}`
-        : this.promise?.active ? `Promise on. ${next ? `Next available cut: ${next.label}.` : 'No available cut remains.'}` : 'Promise off; full-fidelity contrast mode is active.';
+        : this.promise?.active ? `Promise on. ${next ? `Next automatic cut: ${next.label}.` : 'No automatic cut remains.'}` : 'Promise off; full-fidelity contrast mode is active.';
       return {
         ok: true, summary, nowIso: isoNow(), promise: this.promise ? clone(this.promise) : null,
         frame: { primitive: this.framePrimitive, latestMs: latest ? latest.duration : null, worstMsInWindow: frames.length ? Math.max(...frames.map((item) => item.duration)) : null, hitchCount50ms: frames.filter((item) => item.duration >= this.controller.hitchMs).length },
         interaction: { ...interactionStatus, trustedCount: this.interactions.length, rawCount: this.rawEventCount, untrustedRejectedCount: this.untrustedRejectedCount, latestTrusted: this.interactionReadout(latestTrusted) },
-        shed: { active: this.orderedSteps.some((step) => step.currentlyShed), nextUnpinnedStepId: next?.id || null, pins: this.orderedSteps.filter((step) => step.pinned).map((step) => step.id) },
+        shed: { active: this.orderedSteps.some((step) => step.currentlyShed), nextAutomaticStepId: next?.id || null, pins: this.orderedSteps.filter((step) => step.pinned).map((step) => step.id) },
         busyworkLevelPct: this.pressure, busyworkSource: 'human-slider', evidenceGaps: this.evidenceGaps()
       };
     }

@@ -262,8 +262,8 @@
       function fit(canvas, context) {
         const rect = canvas.getBoundingClientRect();
         const ratio = Math.min(devicePixelRatio || 1, 2);
-        const width = Math.max(1, Math.round(rect.width * ratio));
-        const height = Math.max(1, Math.round(rect.height * ratio));
+        const width = Math.min(8192, Math.max(1, Math.round(rect.width * ratio)));
+        const height = Math.min(8192, Math.max(1, Math.round(rect.height * ratio)));
         if (canvas.width !== width || canvas.height !== height) {
           canvas.width = width;
           canvas.height = height;
