@@ -55,7 +55,7 @@
       ui.mute.addEventListener('click', () => { crowdState.muted = !crowdState.muted; ui.mute.classList.toggle('active', crowdState.muted); ui.mute.setAttribute('aria-pressed', String(crowdState.muted)); ui.mute.textContent = crowdState.muted ? 'Room muted' : 'Mute room'; ui.markNote.textContent = crowdState.muted ? 'Room channel muted.' : 'Room channel restored.'; });
       ui.mark.addEventListener('click', () => { crowdState.marks += 1; ui.mark.classList.add('active'); ui.markNote.textContent = `Mark ${crowdState.marks} added to the live trace.`; setTimeout(() => ui.mark.classList.remove('active'), 550); });
       ui.tap.addEventListener('click', () => { ui.tap.textContent = 'Tap received'; $('#tap-note').textContent = 'Your real click is available for the next measurement.'; setTimeout(() => { ui.tap.textContent = 'Tap to measure'; }, 550); });
-      if (reduceMotion) tickOnce(); else requestAnimationFrame(frame);
+      if (reduceMotion) { tickOnce(); setInterval(burnCrowd, 500); } else requestAnimationFrame(frame);
     })();
   </script>
 </body>

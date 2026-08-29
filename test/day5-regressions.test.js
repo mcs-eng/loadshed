@@ -398,10 +398,10 @@ test('the page routes wire the fallback on the requested controls', () => {
   assert.match(saleSource, /ui\.tap\.addEventListener\('click', \(event\) => \{\s*runtime\.recordPageMeasuredClick\(event\)/);
 });
 
-test('active demo surfaces honor reduced motion and expose no production test seam', () => {
+test('active demo surfaces honor reduced motion, preserve pressure, and expose no production test seam', () => {
   assert.match(rootDeskSource, /<h1 class="brand">Hold the Line<\/h1>/);
-  assert.match(rootDeskSource, /if \(reduceMotion\) tickOnce\(\); else requestAnimationFrame\(frame\)/);
-  assert.match(saleSource, /if \(reduceMotion\) drawShimmer\(performance\.now\(\)\); else requestAnimationFrame\(frame\)/);
+  assert.match(rootDeskSource, /if \(reduceMotion\) \{ tickOnce\(\); setInterval\(burnCrowd, 500\); \} else requestAnimationFrame\(frame\)/);
+  assert.match(saleSource, /if \(reduceMotion\) \{ drawShimmer\(performance\.now\(\)\); setInterval\(burnAisle, 500\); \} else requestAnimationFrame\(frame\)/);
   assert.match(saleSource, /Math\.min\(8192, Math\.max\(1, Math\.round\(rect\.width \* ratio\)\)\)/);
   assert.match(saleSource, /Math\.min\(8192, Math\.max\(1, Math\.round\(rect\.height \* ratio\)\)\)/);
   for (const source of [rootDeskSource, saleSource]) {

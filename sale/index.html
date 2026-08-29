@@ -482,7 +482,7 @@
 
       renderChips();
       window.addEventListener('resize', () => drawShimmer(performance.now()));
-      if (reduceMotion) drawShimmer(performance.now()); else requestAnimationFrame(frame);
+      if (reduceMotion) { drawShimmer(performance.now()); setInterval(burnAisle, 500); } else requestAnimationFrame(frame);
     })();
   </script>
 </body>
