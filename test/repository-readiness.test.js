@@ -9,6 +9,8 @@ const root = path.resolve(__dirname, '..');
 
 test('reviewers get a runnable root README with the canonical judge path', () => {
   const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
+  assert.match(readme, /https:\/\/mcs-eng\.github\.io\/loadshed\//);
+  assert.match(readme, /https:\/\/github\.com\/mcs-eng\/loadshed/);
   assert.match(readme, /http:\/\/localhost:8080\//);
   assert.match(readme, /node --test test\\\*\.test\.js/);
   assert.match(readme, /inspect_responsiveness/);
@@ -16,12 +18,12 @@ test('reviewers get a runnable root README with the canonical judge path', () =>
   assert.match(readme, /MIT/i);
 });
 
-test('submission handoff separates repository evidence from operator-owned artifacts', () => {
+test('submission handoff records published artifacts without overstating operator-owned work', () => {
   const handoff = fs.readFileSync(path.join(root, 'SUBMISSION.md'), 'utf8');
-  assert.match(handoff, /Live URL.*PENDING/i);
-  assert.match(handoff, /Public repository.*PENDING/i);
+  assert.match(handoff, /Live URL.*https:\/\/mcs-eng\.github\.io\/loadshed\//i);
+  assert.match(handoff, /Public repository.*https:\/\/github\.com\/mcs-eng\/loadshed/i);
   assert.match(handoff, /YouTube video.*PENDING/i);
-  assert.match(handoff, /do not publish the existing Git history/i);
+  assert.match(handoff, /do not publish this private repository's Git history/i);
   assert.match(handoff, /less than three minutes/i);
   assert.match(handoff, /set_smoothness_contract/);
 });

@@ -5,6 +5,9 @@ agent through WebMCP. The page declares what must stay useful, what work is disp
 order in which that disposable work may be reduced. Every contract, cut, restore, refusal, and
 measurement leaves a plain-language receipt.
 
+**Live demo:** [mcs-eng.github.io/loadshed](https://mcs-eng.github.io/loadshed/) ·
+**Public source:** [github.com/mcs-eng/loadshed](https://github.com/mcs-eng/loadshed)
+
 The flagship demo is the site root: **Hold the Line**, a live-show desk that protects its trace and
 controls while synthetic crowd work loads the main thread. The [Sale demo](sale/) proves that the
 same runtime can protect a different page-owned task without learning that page's DOM. The
@@ -16,7 +19,8 @@ Use either ChatGPT's in-app browser, which supports WebMCP by default, or Google
 `chrome://flags/#enable-webmcp-testing` enabled and the browser restarted. This is the setup named
 in the [official challenge rules](https://webmcp.devpost.com/rules).
 
-1. Open the live site root. The top-right badge should change to **tools ready**.
+1. Open the [live site root](https://mcs-eng.github.io/loadshed/). The top-right badge should
+   change to **tools ready**.
 2. Ask the agent: “Inspect this page's responsiveness and list its adaptation options.” The agent
    can call `inspect_responsiveness` and `get_adaptation_options` without changing the page.
 3. Ask the agent: “Set a 100 ms smoothness contract that protects `live-trace`.” The promise card,
@@ -97,5 +101,5 @@ August 25. The local commit history records the spike, product selection, two de
 fixes, and release hardening. Internal development evidence stays outside the public export; the
 root Desk is the intentional product surface.
 
-The code is licensed under the [MIT License](LICENSE). Submission URLs and operator-owned artifacts
-are tracked honestly in [SUBMISSION.md](SUBMISSION.md); placeholders are not presented as complete.
+The code is licensed under the [MIT License](LICENSE). Published artifacts, qualification evidence,
+and operator-owned close-out work are tracked honestly in [SUBMISSION.md](SUBMISSION.md).

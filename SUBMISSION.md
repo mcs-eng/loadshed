@@ -1,20 +1,22 @@
 # WebMCP Challenge submission handoff
 
-This file separates repository-ready evidence from external artifacts that require Mason's
-accounts, browser session, voice, or final submission authority.
+This file tracks repository evidence, published artifacts, and close-out work that still requires
+a supported WebMCP browser, video upload, or final submission authority.
 
 ## Current submission state
 
-- Source tree and local tests — READY FOR REVIEW.
-- Live URL — **PENDING — operator must choose a host, deploy, and qualify that exact URL.**
-- Public repository — **PENDING — operator must publish a sanitized-history repository and make the
-  MIT license visible in the repository About panel.**
+- Source tree and local tests — **READY — 34/34 Node tests pass.**
+- Live URL — **DEPLOYED — <https://mcs-eng.github.io/loadshed/>.** Anonymous HTTPS checks and an
+  Edge 152 smoke passed on August 29, 2026; real WebMCP-agent qualification is still pending.
+- Public repository — **PUBLIC — <https://github.com/mcs-eng/loadshed>.** It contains only the
+  allowlisted release history, and GitHub detects the root MIT license.
 - YouTube video — **PENDING — operator must record narration, upload publicly, and provide the URL.**
-- Devpost entry — **PENDING — operator must review the final copy and submit before the deadline.**
+- Devpost entry — **PRE-DRAFT — project 1400258 exists; copy, video, required answers, and final
+  submission are not yet complete.**
 
-Do not publish the existing Git history unchanged. Raw local agent transcripts were removed from
-the current tree, but older commits still contain them. Create a new public repository from the
-product-only export instead:
+Do not publish this private repository's Git history. Raw local agent transcripts were removed from
+the current tree, but older private commits still contain them. The public repository was created
+from the product-only export. Use the same exporter for future release staging:
 
 ```powershell
 .\scripts\Export-PublicRelease.ps1 -Destination C:\path\to\loadshed-public
@@ -22,11 +24,8 @@ product-only export instead:
 
 The exporter refuses a destination inside this repository or a nonempty destination, then copies
 an explicit allowlist of product source, tests, license, and judge documentation. Internal build
-orchestration and development artifacts are excluded. Initialize the new Git repository only from
-that output. A history rewrite is also possible, but it is a separate destructive decision because
-it changes every affected commit ID. Before publication, run the exported tests and confirm the
-new repository contains no credentials and exposes the root `LICENSE`, `README.md`, and
-`SUBMISSION.md`.
+orchestration and development artifacts are excluded. Sync only that staged output into the public
+release, rerun its tests, and verify the release hashes before pushing.
 
 ## Draft project description
 
@@ -52,8 +51,8 @@ page-owned outcomes.
 
 ## Hosted qualification
 
-Run this against the exact deployed URL in ChatGPT's in-app browser or Chrome 149+ with the WebMCP
-testing flag enabled. Keep the agent and person roles separate.
+Run this against <https://mcs-eng.github.io/loadshed/> in ChatGPT's in-app browser or Chrome 149+
+with the WebMCP testing flag enabled. Keep the agent and person roles separate.
 
 1. Open the root URL and confirm **tools ready**.
 2. Agent: call `inspect_responsiveness`; confirm promise, frame primitive, interaction diagnosis,
@@ -95,15 +94,15 @@ material.
 
 ## Operator close-out checklist
 
-- [ ] Choose the public project name and repository owner.
-- [ ] Run the allowlisted public exporter, initialize a new repository from its output, and confirm
+- [x] Choose the public project name and repository owner.
+- [x] Run the allowlisted public exporter, initialize a new repository from its output, and confirm
   only sanitized history is reachable.
-- [ ] Make `LICENSE` detectable in the repository About panel.
-- [ ] Choose a static host and deploy the exact reviewed source commit.
+- [x] Make `LICENSE` detectable in the repository About panel.
+- [x] Choose a static host and deploy the exact reviewed source commit.
 - [ ] Complete the hosted qualification above and record its receipt.
 - [ ] Capture screenshots without credentials, private data, browser profiles, or unrelated tabs.
 - [ ] Record, edit, and publicly upload the narrated video; verify runtime is less than 3:00.
-- [ ] Replace the three PENDING URL fields with the real live, repository, and YouTube URLs.
+- [ ] Replace the remaining YouTube placeholder with the public video URL.
 - [ ] Paste and review the project description in Devpost.
 - [ ] Submit before September 3, 2026 at 1:00 PM Pacific, then preserve the submitted artifacts
   through judging.
