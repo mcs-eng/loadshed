@@ -59,7 +59,7 @@ function observer(env, type) {
   return item;
 }
 
-function runtimeIn(env, { twoSteps = false, controller = {}, restoreCrowd = () => {} } = {}) {
+function runtimeIn(env, { twoSteps = false, controller = {}, restoreCrowd = () => {}, restoreExtraTiles = () => {} } = {}) {
   const elements = [
     { id: 'always', label: 'Always protected', neverShed: true },
     { id: 'agent-protected', label: 'Agent protected' },
@@ -68,7 +68,7 @@ function runtimeIn(env, { twoSteps = false, controller = {}, restoreCrowd = () =
   ];
   const ladder = [
     { id: 'crowd', label: 'Crowd', order: 1, shed: () => {}, restore: restoreCrowd },
-    ...(twoSteps ? [{ id: 'extra-tiles', label: 'Extra tiles', order: 2, shed: () => {}, restore: () => {} }] : [])
+    ...(twoSteps ? [{ id: 'extra-tiles', label: 'Extra tiles', order: 2, shed: () => {}, restore: restoreExtraTiles }] : [])
   ];
   return env.window.Loadshed.create({
     elements,
@@ -231,6 +231,46 @@ test('a failed restore refuses to turn off the promise or claim full fidelity', 
   assert.equal(seam.getSnapshot().promise.active, true);
   assert.equal(seam.getSnapshot().steps.find((step) => step.id === 'crowd').currentlyShed, true);
   assert.doesNotMatch(seam.inspect().summary, /full.fidelity/i);
+  runtime.stop();
+});
+
+test('restoreAll stops at the first reverse-order failure and retries the intact ladder', () => {
+  const env = sandbox();
+  const restored = [];
+  let failExtraTiles = true;
+  const runtime = runtimeIn(env, {
+    twoSteps: true,
+    restoreCrowd: () => restored.push('crowd'),
+    restoreExtraTiles: () => {
+      restored.push('extra-tiles');
+      if (failExtraTiles) throw new Error('restore failed');
+    }
+  });
+  const seam = runtime.testSeam();
+  assert.equal(
+    seam.setSmoothnessContract({ maxInteractionLatencyMs: 100, protectedElement: 'always', active: true }).ok,
+    true
+  );
+  assert.equal(seam.applyAdaptation({ stepId: 'crowd', action: 'shed' }).ok, true);
+  assert.equal(seam.applyAdaptation({ stepId: 'extra-tiles', action: 'shed' }).ok, true);
+
+  const failed = seam.setSmoothnessContract({ maxInteractionLatencyMs: 100, protectedElement: 'always', active: false });
+
+  assert.equal(failed.ok, false);
+  assert.deepEqual(restored, ['extra-tiles']);
+  assert.equal(seam.getSnapshot().promise.active, true);
+  assert.equal(seam.getSnapshot().steps.find((step) => step.id === 'extra-tiles').currentlyShed, true);
+  assert.equal(seam.getSnapshot().steps.find((step) => step.id === 'crowd').currentlyShed, true);
+  assert.doesNotMatch(seam.inspect().summary, /full.fidelity/i);
+
+  failExtraTiles = false;
+  const retried = seam.setSmoothnessContract({ maxInteractionLatencyMs: 100, protectedElement: 'always', active: false });
+
+  assert.equal(retried.ok, true);
+  assert.deepEqual(restored, ['extra-tiles', 'extra-tiles', 'crowd']);
+  assert.equal(seam.getSnapshot().promise.active, false);
+  assert.equal(seam.getSnapshot().steps.find((step) => step.id === 'extra-tiles').currentlyShed, false);
+  assert.equal(seam.getSnapshot().steps.find((step) => step.id === 'crowd').currentlyShed, false);
   runtime.stop();
 });
 

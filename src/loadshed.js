@@ -569,7 +569,7 @@
 
     restoreAll(caller = 'page-control') {
       for (const step of [...this.orderedSteps].reverse()) {
-        if (step.currentlyShed) this.changeStep(step, false, caller);
+        if (step.currentlyShed && !this.changeStep(step, false, caller).ok) break;
       }
       this.cooldownSince = 0;
       const restored = !this.orderedSteps.some((step) => step.currentlyShed);
