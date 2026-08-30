@@ -194,3 +194,20 @@ test('stop remains terminal when an in-flight registration resolves late', async
   assert.equal(runtime.testSeam().getSnapshot().registration.status, 'stopped');
   assert.equal(cleanupCalls, 1);
 });
+
+test('stop cleans up a completed registration while a later registration hangs', async () => {
+  let calls = 0;
+  let cleanupCalls = 0;
+  const pending = new Promise(() => {});
+  const env = sandbox({ modelContext: { registerTool() {
+    calls += 1;
+    if (calls === 1) return () => { cleanupCalls += 1; };
+    return pending;
+  } } });
+  const runtime = runtimeIn(env).start();
+  for (let index = 0; index < 8; index += 1) await Promise.resolve();
+  assert.equal(calls, 2);
+  runtime.stop();
+  assert.equal(cleanupCalls, 1);
+  assert.equal(runtime.testSeam().getSnapshot().registration.status, 'stopped');
+});

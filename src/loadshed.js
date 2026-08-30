@@ -667,8 +667,8 @@
         return clone(this.registration);
       }
       const registeredTools = [];
-      const handles = [];
-      const fallbackNames = [];
+      const handles = this.toolRegistrationHandles = [];
+      const fallbackNames = this.toolRegistrationFallbackNames = [];
       this.toolModelContext = modelContext;
       const abortController = typeof AbortController === 'function' ? new AbortController() : null;
       this.toolAbortController = abortController;
@@ -682,15 +682,13 @@
           else fallbackNames.push(tool.name);
           registeredTools.push(tool.name);
           if (!this.started || attempt !== this.registrationAttempt) {
-            this.cleanupToolRegistrations(handles, fallbackNames, modelContext);
+            this.cleanupToolRegistrations(handles.splice(0), fallbackNames.splice(0), modelContext);
             return clone(this.registration);
           }
         }
-        this.toolRegistrationHandles = handles;
-        this.toolRegistrationFallbackNames = fallbackNames;
         this.registration = { surface: 'document.modelContext', status: 'registered', error: null, registeredTools };
       } catch (error) {
-        this.cleanupToolRegistrations(handles, fallbackNames, modelContext);
+        this.cleanupToolRegistrations(handles.splice(0), fallbackNames.splice(0), modelContext);
         abortController?.abort();
         if (!this.started || attempt !== this.registrationAttempt) return clone(this.registration);
         this.toolModelContext = null;
