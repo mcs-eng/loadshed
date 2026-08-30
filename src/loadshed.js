@@ -274,8 +274,11 @@
       if (active && !this.nextAutomaticStep()) {
         return this.refusal('The promise cannot turn on without an available measured-relief step.', caller);
       }
-      this.promise = { active, maxInteractionLatencyMs: max, protectedElement, protectedLabel: protectedItem.label, protectedIds: this.protectedIds(), setAtIso: isoNow(), caller };
-      if (!active) this.restoreAll(caller);
+      const promise = { active, maxInteractionLatencyMs: max, protectedElement, protectedLabel: protectedItem.label, protectedIds: this.protectedIds(), setAtIso: isoNow(), caller };
+      if (!active && !this.restoreAll(caller)) {
+        return this.refusal('The promise cannot turn off until all cut steps are restored.', caller);
+      }
+      this.promise = promise;
       const receipt = this.addReceipt({
         kind: 'contract',
         summary: active
@@ -569,7 +572,9 @@
         if (step.currentlyShed) this.changeStep(step, false, caller);
       }
       this.cooldownSince = 0;
-      this.shedAt = 0;
+      const restored = !this.orderedSteps.some((step) => step.currentlyShed);
+      if (restored) this.shedAt = 0;
+      return restored;
     }
 
     inspect(input = {}) {
@@ -581,14 +586,15 @@
       const latestTrusted = this.interactions.at(-1);
       const interactionStatus = this.interactionDiagnosis();
       const next = this.nextAutomaticStep();
+      const shedActive = this.orderedSteps.some((step) => step.currentlyShed);
       const summary = interactionStatus.diagnosis.startsWith('0 trusted')
         ? `The agent cannot measure clicks on this surface. ${this.interactionPrompt()}`
-        : this.promise?.active ? `Promise on. ${next ? `Next automatic cut: ${next.label}.` : 'No automatic cut remains.'}` : 'Promise off; full-fidelity contrast mode is active.';
+        : this.promise?.active ? `Promise on. ${next ? `Next automatic cut: ${next.label}.` : 'No automatic cut remains.'}` : shedActive ? 'Promise off; restoration is pending for a cut step.' : 'Promise off; full-fidelity contrast mode is active.';
       return {
         ok: true, summary, nowIso: isoNow(), promise: this.promise ? clone(this.promise) : null,
         frame: { primitive: this.framePrimitive, latestMs: latest ? latest.duration : null, worstMsInWindow: frames.length ? Math.max(...frames.map((item) => item.duration)) : null, hitchCount50ms: frames.filter((item) => item.duration >= this.controller.hitchMs).length },
         interaction: { ...interactionStatus, trustedCount: this.interactions.length, rawCount: this.rawEventCount, untrustedRejectedCount: this.untrustedRejectedCount, latestTrusted: this.interactionReadout(latestTrusted) },
-        shed: { active: this.orderedSteps.some((step) => step.currentlyShed), nextAutomaticStepId: next?.id || null, pins: this.orderedSteps.filter((step) => step.pinned).map((step) => step.id) },
+        shed: { active: shedActive, nextAutomaticStepId: next?.id || null, pins: this.orderedSteps.filter((step) => step.pinned).map((step) => step.id) },
         busyworkLevelPct: this.pressure, busyworkSource: 'human-slider', evidenceGaps: this.evidenceGaps()
       };
     }

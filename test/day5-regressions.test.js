@@ -59,7 +59,7 @@ function observer(env, type) {
   return item;
 }
 
-function runtimeIn(env, { twoSteps = false, controller = {} } = {}) {
+function runtimeIn(env, { twoSteps = false, controller = {}, restoreCrowd = () => {} } = {}) {
   const elements = [
     { id: 'always', label: 'Always protected', neverShed: true },
     { id: 'agent-protected', label: 'Agent protected' },
@@ -67,7 +67,7 @@ function runtimeIn(env, { twoSteps = false, controller = {} } = {}) {
     { id: 'extra-tiles', label: 'Extra tiles' }
   ];
   const ladder = [
-    { id: 'crowd', label: 'Crowd', order: 1, shed: () => {}, restore: () => {} },
+    { id: 'crowd', label: 'Crowd', order: 1, shed: () => {}, restore: restoreCrowd },
     ...(twoSteps ? [{ id: 'extra-tiles', label: 'Extra tiles', order: 2, shed: () => {}, restore: () => {} }] : [])
   ];
   return env.window.Loadshed.create({
@@ -208,6 +208,49 @@ test('a contract snapshot names the exact element that backs the promise', () =>
   seam.setSmoothnessContract({ maxInteractionLatencyMs: 175, protectedElement: 'agent-protected', active: true });
   assert.equal(seam.getSnapshot().promise.protectedElement, 'agent-protected');
   assert.equal(seam.getSnapshot().promise.protectedLabel, 'Agent protected');
+  runtime.stop();
+});
+
+test('a failed restore refuses to turn off the promise or claim full fidelity', () => {
+  const env = sandbox();
+  const runtime = runtimeIn(env, { restoreCrowd: () => { throw new Error('restore failed'); } });
+  const seam = runtime.testSeam();
+  assert.equal(
+    seam.setSmoothnessContract({ maxInteractionLatencyMs: 100, protectedElement: 'always', active: true }).ok,
+    true
+  );
+  assert.equal(seam.applyAdaptation({ stepId: 'crowd', action: 'shed' }).ok, true);
+  observer(env, 'event').callback({ getEntries: () => [
+    { name: 'click', interactionId: 1, duration: 20, startTime: 1000 }
+  ] });
+
+  const result = seam.setSmoothnessContract({ maxInteractionLatencyMs: 100, protectedElement: 'always', active: false });
+
+  assert.equal(result.ok, false);
+  assert.match(result.summary, /cannot turn off until all cut steps are restored/i);
+  assert.equal(seam.getSnapshot().promise.active, true);
+  assert.equal(seam.getSnapshot().steps.find((step) => step.id === 'crowd').currentlyShed, true);
+  assert.doesNotMatch(seam.inspect().summary, /full.fidelity/i);
+  runtime.stop();
+});
+
+test('a failed manual restore never reports full fidelity without an active promise', () => {
+  const env = sandbox();
+  const runtime = runtimeIn(env, { restoreCrowd: () => { throw new Error('restore failed'); } });
+  const seam = runtime.testSeam();
+  assert.equal(seam.applyAdaptation({ stepId: 'crowd', action: 'shed' }).ok, true);
+  observer(env, 'event').callback({ getEntries: () => [
+    { name: 'click', interactionId: 1, duration: 20, startTime: 1000 }
+  ] });
+
+  const result = seam.setSmoothnessContract({ maxInteractionLatencyMs: 100, protectedElement: 'always', active: false });
+
+  assert.equal(result.ok, false);
+  assert.match(result.summary, /cannot turn off until all cut steps are restored/i);
+  assert.equal(seam.getSnapshot().promise, null);
+  assert.equal(seam.getSnapshot().steps.find((step) => step.id === 'crowd').currentlyShed, true);
+  assert.match(seam.inspect().summary, /restoration is pending/i);
+  assert.doesNotMatch(seam.inspect().summary, /full.fidelity/i);
   runtime.stop();
 });
 
