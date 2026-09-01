@@ -271,7 +271,8 @@
       if (active && this.started && this.framePrimitive === 'none') {
         return this.refusal('The promise cannot turn on because this browser provides no supported frame-hitch signal.', caller);
       }
-      if (active && !this.nextAutomaticStep()) {
+      const hasReliefStep = this.orderedSteps.some((step) => step.shedable && step.measuredRelief && !step.pinned);
+      if (active && !hasReliefStep) {
         return this.refusal('The promise cannot turn on without an available measured-relief step.', caller);
       }
       const promise = { active, maxInteractionLatencyMs: max, protectedElement, protectedLabel: protectedItem.label, protectedIds: this.protectedIds(), setAtIso: isoNow(), caller };
@@ -500,7 +501,7 @@
 
     updateAfterMeasurement(interaction) {
       const shedReceipt = this.latestShedReceipt();
-      if (!shedReceipt || interaction.startTime < this.shedAt) return;
+      if (!shedReceipt || !this.shedAt || interaction.startTime < this.shedAt) return;
       shedReceipt.interaction.afterMs = interaction.duration;
       shedReceipt.interaction.interactionId = interaction.interactionId;
       shedReceipt.interaction.trust = interaction.trust === 'page-measured'

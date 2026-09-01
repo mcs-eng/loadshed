@@ -392,7 +392,7 @@
           syncPromiseUi(state.promise);
           ui.receiptCount.textContent = `${state.receipts.length} event${state.receipts.length === 1 ? '' : 's'}`;
           const latest = state.receipts.find((item) => item.kind === 'measurement')?.interaction;
-          if (latest?.trust === 'trusted-user') ui.click.textContent = formatMs(latest.afterMs || latest.beforeMs);
+          if (latest?.trust === 'trusted-user') ui.click.textContent = formatMs(latest.afterMs ?? latest.beforeMs);
           else if (state.interaction.latestTrusted) ui.click.textContent = formatInteraction(state.interaction.latestTrusted);
           else if (state.interaction.trustedCount) ui.click.textContent = 'a click was seen';
           else if (state.interaction.rawCount) ui.click.textContent = `0 trusted of ${state.interaction.rawCount} raw`;
