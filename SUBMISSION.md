@@ -288,9 +288,12 @@ submission.
 - [x] Repeat the qualification in ChatGPT's in-app browser or Chrome 149+ with a physical click.
   (Done 2026-09-01 in ChatGPT's in-app browser against public commit `74c13a8`; see the
   September 1 qualification receipt above.)
+- [x] Tag the judged commit: public `e031503` carries annotated tag `v0.1.0-submission`
+  (pushed 2026-09-01).
+- [x] Devpost draft text updated 2026-09-01: test count 49, both "320.157 ms" figures rounded
+  to "about 320 ms", and one paragraph naming `e031503` and the post-merge smoke.
 - [ ] Recommended, not required: repeat one named-client pass (ChatGPT in-app browser or
-  Chrome 149+) against public `e031503`, then tag that commit on the public repository as
-  `v0.1.0-submission` so the judged commit is named forever.
+  Chrome 149+) against public `e031503` and record it in the tested-clients row.
 - [ ] Record, edit, and publicly upload the narrated video; verify runtime is less than 3:00.
   Use the private clone's `VIDEO-RECORDING-SHEET.md` at the mic (not part of the public export).
 - [ ] Replace the remaining YouTube placeholder with the public video URL.
