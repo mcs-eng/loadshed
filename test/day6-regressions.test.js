@@ -233,6 +233,14 @@ test('a third automatic cut names the most recent previous cut, not the ladder-f
   runtime.stop();
 });
 
+test('both demo toggles revert the checkbox to the runtime state when a promise change is refused', () => {
+  const indexSource = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  for (const [name, source] of [['index.html', indexSource], ['sale/index.html', saleSource]]) {
+    assert.match(source, /ui\.promiseToggle\.checked = !active;/, `${name} must revert the toggle to the opposite of the refused request`);
+    assert.doesNotMatch(source, /if \(!result\.ok\) \{\s*ui\.promiseToggle\.checked = false;/, `${name} must not force the toggle off after a refused off-switch`);
+  }
+});
+
 test('restoreAll validates its caller like every other mutator', () => {
   assert.match(loadshedSource, /restoreAll\(caller = 'page-control'\) \{\s*ensureCaller\(caller\);/);
 });

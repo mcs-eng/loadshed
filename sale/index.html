@@ -455,8 +455,8 @@
         const active = ui.promiseToggle.checked;
         const result = runtime.setContract({ maxInteractionLatencyMs: holdState.maxInteractionLatencyMs, protectedElement: 'hold-size', active }, 'page-control');
         if (!result.ok) {
-          ui.promiseToggle.checked = false;
-          ui.promiseState.textContent = 'unavailable';
+          ui.promiseToggle.checked = !active;
+          ui.promiseState.textContent = active ? 'unavailable' : 'on';
           ui.promiseSentence.textContent = result.summary;
           return;
         }
