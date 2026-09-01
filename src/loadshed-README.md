@@ -54,7 +54,7 @@ After a cut, another automatic cut waits at least 900 ms and only sees hitches w
 
 While a promise is active, a 350 ms controller heartbeat re-evaluates those clocks even if no new observer entry arrives. It does not emit page state when nothing changed, and `.stop()` clears it.
 
-The controller never changes a page object itself. A registered ladder step supplies the `shed` and `restore` functions. The page chooses what those functions do and is responsible for keeping protected work out of them.
+The controller never changes a page object itself. A registered ladder step supplies the `shed` and `restore` functions. The page chooses what those functions do and is responsible for keeping protected work out of them. A shedable step that lacks either function is rejected when the runtime is created.
 
 ## Page API
 
@@ -87,7 +87,7 @@ Useful runtime methods are:
 - `protectElement({ elementId, protect }, caller)` protects or releases an allowed page element.
 - `recordPageMeasuredClick(event)` is the page-only fast-click fallback. It rejects injected events, waits for Event Timing first, and never overwrites a matching trusted Event Timing sample.
 - `applyAdaptation({ stepId, action }, caller)` accepts `shed`, `restore`, `pin`, and `unpin`.
-- `inspect({ windowMs })`, `adaptationOptions()`, and `interventionReceipts({ sinceIso, limit })` are read-only snapshots.
+- `inspect({ windowMs })`, `adaptationOptions()`, and `interventionReceipts({ sinceIso, limit })` are read-only snapshots. `sinceIso`, when given, must be an ISO 8601 date or date-time string.
 - `testSeam()` returns a readout and explicitly stamped setters. It has no route into the performance observers.
 
 Mutating API calls require one caller stamp: `webmcp-agent`, `page-control`, or `test-seam`.

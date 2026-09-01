@@ -14,6 +14,7 @@
   const SHED_DWELL_MS = 900;
   const PAGE_MEASURED_FALLBACK_MS = 80;
   const INTERACTION_MATCH_WINDOW_MS = 8;
+  const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})?)?$/;
   const own = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
   const now = () => performance.now();
   const isoNow = () => new Date().toISOString();
@@ -74,6 +75,7 @@
       this.pressureSince = 0;
       this.cooldownSince = 0;
       this.shedAt = 0;
+      this.openComparison = null;
       this.started = false;
       this.registration = { surface: 'unavailable', status: 'pending', error: null, registeredTools: [] };
       this.controller = {
@@ -111,6 +113,9 @@
         }
         if (pageElement.neverShed || entry.protected) {
           throw new TypeError(`A protected element cannot be a shed step: ${entry.id}.`);
+        }
+        if (entry.shedable !== false && (typeof entry.shed !== 'function' || typeof entry.restore !== 'function')) {
+          throw new TypeError(`A shedable ladder step needs shed and restore functions: ${entry.id}.`);
         }
         this.steps.set(entry.id, {
           id: entry.id,
@@ -200,7 +205,11 @@
       }
       const lastShed = this.receipts.find((receipt) => receipt.kind === 'shed');
       if (lastShed?.interaction?.beforeMs === null) gaps.push('A trusted before-click sample was not captured for the last cut.');
-      if (lastShed && lastShed.interaction?.afterMs === null) gaps.push('Ask for one trusted click after the last cut to complete the comparison.');
+      if (lastShed && lastShed.interaction?.afterMs === null) {
+        gaps.push(this.openComparison?.stepId === lastShed.shed?.stepId
+          ? 'Ask for one trusted click after the last cut to complete the comparison.'
+          : 'The last cut was restored before a trusted after-click was captured; that comparison stays incomplete.');
+      }
       return [...new Set(gaps)];
     }
 
@@ -228,13 +237,21 @@
       this.receipts.unshift(receipt);
       if (this.receipts.length > HISTORY_LIMITS.receipts) this.receipts.length = HISTORY_LIMITS.receipts;
       receipt.evidenceGaps = this.evidenceGaps();
-      this.options.onReceipt?.(clone(receipt));
+      this.notify(this.options.onReceipt, clone(receipt));
       this.emitState();
       return receipt;
     }
 
     emitState() {
-      this.options.onState?.(this.getSnapshot());
+      this.notify(this.options.onState, this.getSnapshot());
+    }
+
+    notify(callback, payload) {
+      if (typeof callback !== 'function') return;
+      try {
+        const result = callback(payload);
+        if (result && typeof result.catch === 'function') result.catch(() => {});
+      } catch (error) { /* A page callback failure must not change runtime state or the caller's result. */ }
     }
 
     setBusyworkLevel(level, caller = 'page-control') {
@@ -372,6 +389,8 @@
         beforeMs: trigger.beforeInteractionMs,
         afterMs: null
       } : null;
+      if (shouldShed && trigger) this.openComparison = { receiptId: null, stepId: step.id, shedAt: this.shedAt };
+      if (!shouldShed && this.openComparison?.stepId === step.id) this.openComparison = null;
       const receipt = this.addReceipt({
         kind,
         summary: shouldShed && trigger?.postShedInteraction
@@ -388,6 +407,7 @@
         interaction,
         shed: { from, to, stepId: step.id }
       });
+      if (shouldShed && trigger) this.openComparison.receiptId = receipt.id;
       return { ok: true, summary: receipt.summary, receiptId: receipt.id, adaptation: this.stepSnapshot(step), evidenceGaps: this.evidenceGaps() };
     }
 
@@ -406,10 +426,6 @@
     recent(items, milliseconds) {
       const timestamp = now();
       return items.filter((item) => timestamp - item.observedAt <= milliseconds);
-    }
-
-    latestShedReceipt() {
-      return this.receipts.find((receipt) => receipt.kind === 'shed' && receipt.interaction);
     }
 
     observePerformance() {
@@ -500,8 +516,10 @@
     }
 
     updateAfterMeasurement(interaction) {
-      const shedReceipt = this.latestShedReceipt();
-      if (!shedReceipt || !this.shedAt || interaction.startTime < this.shedAt) return;
+      const comparison = this.openComparison;
+      if (!comparison || interaction.startTime < comparison.shedAt) return;
+      const shedReceipt = this.receipts.find((receipt) => receipt.id === comparison.receiptId);
+      if (!shedReceipt?.interaction) return;
       shedReceipt.interaction.afterMs = interaction.duration;
       shedReceipt.interaction.interactionId = interaction.interactionId;
       shedReceipt.interaction.trust = interaction.trust === 'page-measured'
@@ -519,7 +537,7 @@
         existing.summary = summary;
         existing.interaction = this.interactionSnapshot(shedReceipt.interaction);
         existing.evidenceGaps = this.evidenceGaps();
-        this.options.onReceipt?.(clone(existing));
+        this.notify(this.options.onReceipt, clone(existing));
       } else {
         const receipt = this.addReceipt({
           kind: 'measurement', summary, caller: 'page-control',
@@ -557,7 +575,7 @@
           beforeInteractionId: worstInteraction?.interactionId ?? 0,
           beforeInteractionTrust: worstInteraction?.trust || null,
           postShedInteraction: worstPostShedInteraction && worstPostShedInteraction.duration > this.promise.maxInteractionLatencyMs ? worstPostShedInteraction : null,
-          previousStepLabel: this.orderedSteps.find((step) => step.currentlyShed)?.label || null
+          previousStepLabel: [...this.orderedSteps].reverse().find((step) => step.currentlyShed)?.label || null
         });
       }
       if (this.orderedSteps.some((step) => step.currentlyShed) && this.pressure <= this.controller.clearThreshold) {
@@ -569,6 +587,7 @@
     }
 
     restoreAll(caller = 'page-control') {
+      ensureCaller(caller);
       for (const step of [...this.orderedSteps].reverse()) {
         if (step.currentlyShed && !this.changeStep(step, false, caller).ok) break;
       }
@@ -619,12 +638,12 @@
       if (!Number.isInteger(limit) || limit < 1 || limit > 100) throw new TypeError('limit must be an integer from 1 to 100.');
       let since = null;
       if (own(input, 'sinceIso')) {
-        if (typeof input.sinceIso !== 'string') throw new TypeError('sinceIso must be an ISO date string.');
+        if (typeof input.sinceIso !== 'string' || !ISO_DATE_PATTERN.test(input.sinceIso)) throw new TypeError('sinceIso must be an ISO date string.');
         since = Date.parse(input.sinceIso);
-        if (Number.isNaN(since)) throw new TypeError('sinceIso must be an ISO date string.');
+        if (!Number.isFinite(since)) throw new TypeError('sinceIso must be an ISO date string.');
       }
       const receipts = this.receipts.slice(0, HISTORY_LIMITS.receipts)
-        .filter((receipt) => !since || Date.parse(receipt.atIso) >= since)
+        .filter((receipt) => since === null || Date.parse(receipt.atIso) >= since)
         .slice(0, limit)
         .map(clone);
       return { ok: true, summary: receipts.length ? receipts[0].summary : 'No intervention receipts yet.', receipts, evidenceGaps: this.evidenceGaps() };
