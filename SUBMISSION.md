@@ -55,28 +55,28 @@ page-owned outcomes.
 
 ## Devpost required answers (drafted 2026-09-01)
 
-The rules ask four things of the text description. Paste each answer under its prompt on the form; every figure below comes from the September 1 receipt.
+The Devpost project form asks four things of the text description; confirm the prompt wording on the form before pasting, since the four prompts below are drafted from memory of the form and carry no field id. Paste each answer under its prompt; every figure below comes from the September 1 receipt against public commit `74c13a8`.
 
 **Why is this use case a strong fit for WebMCP?**
-A page under load knows which human task must survive; an agent reading the DOM does not. Loadshed lets the page publish that priority as six WebMCP tools registered with `document.modelContext.registerTool`: a smoothness contract, a protected element, an ordered ladder of disposable work, and receipts for every cut and refusal. The agent negotiates against the page's own contract instead of guessing from selectors.
+A page under load knows which human task must survive; an agent reading the DOM does not. Loadshed lets the page publish that priority as six WebMCP tools registered with `document.modelContext.registerTool`, covering a smoothness contract, a protected element, an ordered ladder of disposable work, and receipts for every cut and every state-touching refusal. The agent negotiates against the page's own contract instead of guessing from selectors.
 
 **How does it create a better user experience?**
-Cuts are bounded, ordered, reversible, and visible. On the deployed Desk, a measured 334.6 ms long frame cut Crowd from 480 to 48 while the live trace and mixer stayed usable, and the page-measured interaction went from 205.3 ms before the cut to 0.9 ms after. The person keeps the pressure controls and the trusted click; the agent can inspect, negotiate, protect, adapt, and audit without ever inventing evidence.
+Cuts are bounded, ordered, reversible, and visible. On the deployed Desk, measured on September 1 against public commit `74c13a8`, a 334.6 ms long frame cut Crowd from 480 to 48 while the live trace and mixer stayed usable, and the page-measured interaction went from 205.3 ms before the cut to 0.9 ms after. The person keeps the pressure controls and the trusted click; the agent can inspect, negotiate, protect, adapt, and audit without ever inventing evidence.
 
 **What can people and agents do together that was difficult or impossible before?**
 An agent can set a 100 ms promise for a named element and protect a second target, then read structured receipts that agree with what the person sees. The person supplies the physical click that makes latency evidence trustworthy; the runtime rejects agent-injected clicks and says so. Neither side could do this alone: the agent cannot produce trusted interaction evidence, and the person cannot read frame timing.
 
 **Briefly explain how you implemented WebMCP.**
-`src/loadshed.js` is one reusable runtime. It registers `inspect_responsiveness`, `get_adaptation_options`, `set_smoothness_contract`, `protect_experience_element`, `apply_adaptation`, and `get_intervention_receipts`, observes `long-animation-frame` and interaction timing, applies only page-registered callbacks in declared order, and fails closed when the browser cannot support an honest promise. The Desk and Sale pages prove the same engine protecting different page-owned outcomes with no knowledge of each other's DOM. 49 Node tests cover the runtime; the live site runs public commit `e031503`.
+`src/loadshed.js` is one reusable runtime. It registers `inspect_responsiveness`, `get_adaptation_options`, `set_smoothness_contract`, `protect_experience_element`, `apply_adaptation`, and `get_intervention_receipts`, observes `long-animation-frame` and interaction timing, applies only page-registered callbacks in declared order, and fails closed when the browser cannot support an honest promise. The Desk and Sale pages prove the same engine protecting different page-owned outcomes with no knowledge of each other's DOM. 49 Node tests, 45 of them on the runtime and demos, cover the project; the live site serves the `e031503` runtime from the Pages branch `main`.
 
 ## Thursday pre-submit checklist
 
 Submissions close Thursday, September 3, 2026 at 1:00 PM Pacific, 4:00 PM Eastern. Do these in order on Wednesday evening and Thursday morning.
 
-1. Record the video from the recording sheet in one clean browser window. Confirm the runtime is under 3:00 and the audio names WebMCP and what was built.
+1. Record the video from `VIDEO-RECORDING-SHEET.md` in the private clone (not part of the public export) in one clean browser window. Confirm the runtime is under 3:00 and the audio names WebMCP and what was built.
 2. Upload it to YouTube as public. Open the link in a private window to confirm it plays without sign-in.
-3. Open <https://mcs-eng.github.io/loadshed/> in ChatGPT's in-app browser one more time and confirm the badge reads **tools ready**. Record the date and client in the tested-clients row.
-4. On the Devpost form, paste the four answers above, the live URL, and the public repository URL <https://github.com/mcs-eng/loadshed>. Replace the YouTube placeholder with the real URL.
+3. Open <https://mcs-eng.github.io/loadshed/> in ChatGPT's in-app browser one more time and confirm the badge reads **tools ready**. That is a tools-ready smoke, not a qualification; only the ten-step hosted qualification above earns an entry in the tested-clients row, so run that instead if time allows and record it there.
+4. On the Devpost form, paste the four answers above, the live URL, and the public repository URL <https://github.com/mcs-eng/loadshed>. Replace the YouTube placeholder with the real URL. Answer the four operator-choice fields `28249`, `28250`, `28259`, and `28260` from the final-form map below, and confirm the project's team roster on Devpost matches the submitter type chosen in `28249`.
 5. Confirm the public repository still shows the MIT license in the About panel and that tag `v0.1.0-submission` still points at `e031503`.
 6. Read the whole form once as a judge would. Then submit before 4:00 PM Eastern, not at it.
 7. Keep the confirmation page as a PDF outside this public repository and note the submission time in the private clone.
