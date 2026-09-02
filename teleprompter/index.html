@@ -1,0 +1,1560 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#17130f">
+  <title>Tube Prompt — a local teleprompter</title>
+  <style>
+    :root {
+      --ink: #f6d58a;
+      --ink-bright: #fff1ba;
+      --ink-dim: #ae8140;
+      --cabinet: #211914;
+      --cabinet-edge: #49352a;
+      --panel: #17130f;
+      --panel-raised: #251d17;
+      --brass: #b88a49;
+      --brass-dark: #6f4a24;
+      --screen: #100c07;
+      --danger: #ec9c73;
+      --muted: #b7a487;
+      --prompt-size: 64px;
+      --prompt-leading: 1.32;
+      --prompt-width: 20ch;
+      --focus-position: 42%;
+      --radius: 22px;
+      font-family: "Courier New", Courier, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    html {
+      min-width: 320px;
+      background: #0c0a08;
+      scrollbar-gutter: stable;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      color: #ead9bd;
+      background:
+        radial-gradient(circle at 50% -15%, rgba(113, 77, 42, .3), transparent 43rem),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, .012) 0 1px, transparent 1px 7px),
+        #0c0a08;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button,
+    input,
+    select,
+    textarea,
+    .file-button {
+      border-radius: 7px;
+    }
+
+    button,
+    .file-button {
+      min-height: 44px;
+      border: 1px solid #6e5438;
+      color: #f3ddba;
+      background: linear-gradient(#3b2e23, #241b15);
+      box-shadow: inset 0 1px rgba(255, 255, 255, .08), 0 2px 0 #080604;
+      cursor: pointer;
+      letter-spacing: .02em;
+    }
+
+    button:hover,
+    .file-button:hover {
+      border-color: var(--brass);
+      color: #fff5df;
+    }
+
+    button:active,
+    .file-button:active {
+      transform: translateY(1px);
+      box-shadow: inset 0 1px rgba(0, 0, 0, .25);
+    }
+
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    :focus-visible {
+      outline: 3px solid #ffd985;
+      outline-offset: 3px;
+    }
+
+    .file-button:focus-within {
+      outline: 3px solid #ffd985;
+      outline-offset: 3px;
+    }
+
+    .masthead {
+      width: min(1440px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 18px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      width: 48px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--brass-dark);
+      border-radius: 50%;
+      color: var(--ink-bright);
+      background: radial-gradient(circle at 37% 32%, #72552c 0 8%, #24160c 34%, #090705 72%);
+      box-shadow: 0 0 0 3px #100c08, 0 0 0 4px #3f2d20;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: -.05em;
+    }
+
+    .eyebrow {
+      margin: 0 0 5px;
+      color: var(--brass);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      color: #f0e3cd;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(28px, 4vw, 45px);
+      font-weight: 500;
+      letter-spacing: -.035em;
+    }
+
+    .privacy-note {
+      max-width: 430px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+      text-align: right;
+    }
+
+    .privacy-note strong {
+      color: #ead8b8;
+    }
+
+    .teleprompter-app {
+      width: min(1440px, calc(100% - 32px));
+      margin: 0 auto;
+      padding-bottom: 48px;
+    }
+
+    .workbench {
+      display: grid;
+      grid-template-columns: minmax(290px, 370px) minmax(0, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .setup-panel,
+    .shortcut-card {
+      border: 1px solid #3d3026;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, .025), transparent 28%),
+        var(--panel);
+      box-shadow: 0 16px 45px rgba(0, 0, 0, .25);
+    }
+
+    .setup-panel {
+      position: sticky;
+      top: 18px;
+      border-radius: 12px;
+      overflow: clip;
+    }
+
+    .panel-heading {
+      padding: 18px 18px 15px;
+      border-bottom: 1px solid #3a2c22;
+      background: linear-gradient(90deg, #261d16, #1b1511);
+    }
+
+    .panel-heading h2 {
+      margin: 0 0 5px;
+      color: #f1dfc0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 21px;
+      font-weight: 500;
+    }
+
+    .panel-heading p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .panel-body {
+      padding: 17px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      margin-bottom: 15px;
+    }
+
+    .field-label,
+    .group-label {
+      color: #ddc8a6;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .field-label {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .field-output {
+      color: var(--ink);
+      font-weight: 400;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid #584534;
+      color: #f2e5d1;
+      background: #0d0b09;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, .35);
+    }
+
+    input[type="text"],
+    select {
+      min-height: 44px;
+      padding: 9px 11px;
+    }
+
+    textarea {
+      min-height: 265px;
+      resize: vertical;
+      padding: 12px;
+      line-height: 1.5;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      min-height: 44px;
+      accent-color: var(--brass);
+      cursor: pointer;
+    }
+
+    .inline-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .switches {
+      display: grid;
+      gap: 10px;
+      margin: 4px 0 18px;
+    }
+
+    .switch {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border: 1px solid #49392c;
+      border-radius: 7px;
+      color: #ddcdb5;
+      background: #110e0b;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .switch input {
+      width: 19px;
+      height: 19px;
+      margin: 0;
+      accent-color: var(--brass);
+    }
+
+    .file-row,
+    .transport {
+      display: grid;
+      gap: 8px;
+    }
+
+    .file-row {
+      grid-template-columns: 1fr 1fr;
+      margin-bottom: 17px;
+    }
+
+    .file-button {
+      display: grid;
+      place-items: center;
+      padding: 8px 10px;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .file-button input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .transport {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .transport button {
+      padding: 9px 10px;
+      font-size: 12px;
+    }
+
+    .transport .start-button {
+      grid-column: 1 / -1;
+      min-height: 54px;
+      border-color: #b8813e;
+      color: #201409;
+      background: linear-gradient(#ffd27b, #bb7e35);
+      box-shadow: inset 0 1px #fff0c9, 0 3px 0 #684019;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .11em;
+    }
+
+    .transport .start-button:hover {
+      color: #130b05;
+      background: linear-gradient(#ffe2a8, #ce9148);
+    }
+
+    .save-state {
+      min-height: 18px;
+      margin: 12px 0 0;
+      color: #8f7e67;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .television-column {
+      min-width: 0;
+    }
+
+    .television {
+      position: relative;
+      padding: clamp(17px, 2.6vw, 36px);
+      border: 1px solid #5d4638;
+      border-radius: clamp(25px, 4vw, 54px);
+      background:
+        linear-gradient(125deg, rgba(255, 255, 255, .09), transparent 15% 70%, rgba(0, 0, 0, .32)),
+        repeating-linear-gradient(88deg, rgba(255, 255, 255, .015) 0 2px, transparent 2px 9px),
+        linear-gradient(145deg, #4a372c, #251a15 47%, #17100d);
+      box-shadow:
+        inset 0 0 0 3px #19110d,
+        inset 0 0 0 6px #6a4c38,
+        0 28px 70px rgba(0, 0, 0, .5);
+    }
+
+    .television::before {
+      content: "";
+      position: absolute;
+      inset: 8px 12% auto;
+      height: 2px;
+      border-radius: 50%;
+      background: rgba(255, 227, 183, .12);
+    }
+
+    .television-face {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 102px;
+      gap: clamp(15px, 2.4vw, 30px);
+      align-items: stretch;
+    }
+
+    .screen-bezel {
+      min-width: 0;
+      padding: clamp(10px, 1.7vw, 19px);
+      border: 2px solid #0e0906;
+      border-radius: 13% / 9%;
+      background: linear-gradient(145deg, #0d0906, #332218 48%, #120c08);
+      box-shadow: inset 0 0 15px #000, 0 1px rgba(255, 255, 255, .12);
+    }
+
+    .crt-screen {
+      position: relative;
+      width: 100%;
+      height: clamp(430px, 69vh, 810px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior: contain;
+      border: 1px solid #604a2c;
+      border-radius: 11% / 7%;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 50% 48%, #1c1308 0, var(--screen) 73%, #050403 100%);
+      box-shadow:
+        inset 0 0 70px #000,
+        inset 0 0 14px rgba(255, 196, 83, .16),
+        0 0 18px rgba(255, 172, 49, .08);
+      scrollbar-width: none;
+    }
+
+    .crt-screen::-webkit-scrollbar {
+      display: none;
+    }
+
+    .crt-screen::before,
+    .crt-screen::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      border-radius: inherit;
+    }
+
+    .crt-screen::before {
+      background: repeating-linear-gradient(
+        180deg,
+        rgba(255, 255, 255, .018) 0,
+        rgba(255, 255, 255, .018) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+      opacity: .55;
+    }
+
+    .crt-screen::after {
+      box-shadow:
+        inset 12px 0 28px rgba(0, 0, 0, .32),
+        inset -12px 0 28px rgba(0, 0, 0, .32),
+        inset 0 18px 40px rgba(255, 232, 183, .035),
+        inset 0 -18px 45px rgba(0, 0, 0, .45);
+    }
+
+    .prompt-copy {
+      width: min(var(--prompt-width), calc(100% - 56px));
+      min-height: 100%;
+      margin: 0 auto;
+      padding-top: var(--prompt-top-pad, 320px);
+      padding-bottom: var(--prompt-bottom-pad, 440px);
+      font-size: var(--prompt-size);
+      line-height: var(--prompt-leading);
+      letter-spacing: -.025em;
+      text-wrap: pretty;
+      text-shadow: 0 0 7px rgba(255, 193, 67, .38), 0 0 20px rgba(255, 171, 35, .14);
+      transform-origin: center center;
+    }
+
+    .prompt-copy.is-mirrored {
+      transform: scaleX(-1);
+    }
+
+    .prompt-copy p {
+      margin: 0 0 .86em;
+      white-space: pre-wrap;
+    }
+
+    .prompt-copy .cue {
+      margin-bottom: 1.1em;
+      color: #a57b3f;
+      font-size: .48em;
+      line-height: 1.35;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      text-shadow: 0 0 8px rgba(255, 172, 48, .16);
+    }
+
+    .prompt-copy .empty-script {
+      color: var(--ink-dim);
+      font-size: .7em;
+      font-style: italic;
+    }
+
+    .focus-guide {
+      position: sticky;
+      top: var(--focus-position);
+      z-index: 3;
+      width: 100%;
+      height: 1px;
+      margin-top: -1px;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent 0 5%, rgba(255, 191, 76, .18) 12% 88%, transparent 95%);
+    }
+
+    .focus-guide::before,
+    .focus-guide::after {
+      content: "";
+      position: absolute;
+      top: -4px;
+      width: 11px;
+      height: 9px;
+      border: solid rgba(255, 199, 94, .65);
+    }
+
+    .focus-guide::before {
+      left: 12px;
+      border-width: 1px 0 1px 1px;
+    }
+
+    .focus-guide::after {
+      right: 12px;
+      border-width: 1px 1px 1px 0;
+    }
+
+    .countdown {
+      position: sticky;
+      top: 0;
+      z-index: 6;
+      width: 100%;
+      height: 100%;
+      margin-bottom: -100%;
+      display: grid;
+      place-items: center;
+      color: var(--ink-bright);
+      background: rgba(8, 6, 3, .92);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(120px, 25vw, 330px);
+      text-shadow: 0 0 18px rgba(255, 197, 84, .65), 0 0 70px rgba(255, 156, 28, .25);
+    }
+
+    .tube-console {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 5px 4px;
+      border-left: 1px solid rgba(255, 255, 255, .08);
+    }
+
+    .speaker {
+      width: 72px;
+      flex: 1;
+      min-height: 150px;
+      margin-bottom: 26px;
+      border: 1px solid #100b08;
+      border-radius: 9px;
+      background:
+        radial-gradient(circle, #090706 0 2px, transparent 2.5px) 0 0 / 9px 9px,
+        #2d211a;
+      box-shadow: inset 0 0 16px #0a0705, 0 1px rgba(255, 255, 255, .08);
+    }
+
+    .dial {
+      width: 65px;
+      aspect-ratio: 1;
+      position: relative;
+      margin-bottom: 22px;
+      display: grid;
+      place-items: center;
+      border: 3px solid #5d4124;
+      border-radius: 50%;
+      color: #d8a958;
+      background: radial-gradient(circle at 36% 31%, #7a5b32 0 5%, #2a1c10 35%, #0e0906 72%);
+      box-shadow: 0 0 0 3px #130d09, 0 0 0 4px #523825, inset 0 0 8px #000;
+      font-size: 9px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .dial::before {
+      content: "";
+      position: absolute;
+      top: 7px;
+      width: 2px;
+      height: 14px;
+      background: #e9bd6d;
+      transform: rotate(31deg);
+      transform-origin: 50% 25px;
+    }
+
+    .pilot-light {
+      width: 12px;
+      aspect-ratio: 1;
+      border: 1px solid #392b17;
+      border-radius: 50%;
+      background: #8e6527;
+      box-shadow: 0 0 8px rgba(255, 182, 61, .6), inset 0 1px #ffe2a6;
+    }
+
+    .maker-plate {
+      margin-top: 14px;
+      color: #a88a60;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 9px;
+      letter-spacing: .18em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .readout {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1px;
+      margin-top: 20px;
+      overflow: clip;
+      border: 1px solid #463425;
+      border-radius: 8px;
+      background: #463425;
+    }
+
+    .readout-item {
+      min-width: 0;
+      padding: 11px 13px;
+      color: #8f7d64;
+      background: #120f0c;
+      font-size: 10px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .readout-item strong {
+      display: block;
+      margin-top: 4px;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: .01em;
+      text-overflow: ellipsis;
+      text-transform: none;
+      white-space: nowrap;
+    }
+
+    .progress-track {
+      grid-column: 1 / -1;
+      height: 5px;
+      border: 0;
+      border-radius: 0;
+      appearance: none;
+    }
+
+    .progress-track::-webkit-progress-bar {
+      background: #080604;
+    }
+
+    .progress-track::-webkit-progress-value {
+      background: linear-gradient(90deg, #936328, #f2bd5d);
+    }
+
+    .progress-track::-moz-progress-bar {
+      background: linear-gradient(90deg, #936328, #f2bd5d);
+    }
+
+    .shortcut-card {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 9px;
+      color: #a9977d;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .shortcut-card strong {
+      color: #dfccb0;
+    }
+
+    kbd {
+      display: inline-block;
+      min-width: 25px;
+      margin: 0 2px;
+      padding: 1px 5px;
+      border: 1px solid #5b4634;
+      border-bottom-width: 2px;
+      border-radius: 4px;
+      color: #f0d79f;
+      background: #211912;
+      font: inherit;
+      text-align: center;
+    }
+
+    .screen-reader-status {
+      position: fixed;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      clip-path: inset(50%);
+    }
+
+    body.is-on-air {
+      overflow: hidden;
+      cursor: none;
+      background: #050403;
+    }
+
+    body.is-on-air .masthead,
+    body.is-on-air .setup-panel,
+    body.is-on-air .shortcut-card,
+    body.is-on-air .tube-console,
+    body.is-on-air .readout {
+      display: none;
+    }
+
+    body.is-on-air .teleprompter-app {
+      width: 100%;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+
+    body.is-on-air .workbench,
+    body.is-on-air .television-column {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    body.is-on-air .television {
+      width: 100%;
+      height: 100%;
+      padding: clamp(10px, 1.7vw, 24px);
+      border-radius: clamp(18px, 3vw, 42px);
+    }
+
+    body.is-on-air .television-face,
+    body.is-on-air .screen-bezel,
+    body.is-on-air .crt-screen {
+      width: 100%;
+      height: 100%;
+    }
+
+    body.is-on-air .television-face {
+      display: block;
+    }
+
+    body.is-on-air .screen-bezel {
+      padding: clamp(8px, 1.2vw, 16px);
+    }
+
+    body.is-on-air .focus-guide {
+      opacity: .6;
+    }
+
+    @media (max-width: 980px) {
+      .workbench {
+        grid-template-columns: 1fr;
+      }
+
+      .setup-panel {
+        position: static;
+      }
+
+      .panel-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 18px;
+      }
+
+      .field.script-field,
+      .file-row,
+      .transport,
+      .save-state {
+        grid-column: 1 / -1;
+      }
+
+      textarea {
+        min-height: 220px;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .masthead {
+        width: min(100% - 24px, 1440px);
+        padding-top: 20px;
+        align-items: start;
+        flex-direction: column;
+      }
+
+      .privacy-note {
+        text-align: left;
+      }
+
+      .teleprompter-app {
+        width: min(100% - 20px, 1440px);
+      }
+
+      .panel-body {
+        display: block;
+      }
+
+      .inline-fields {
+        grid-template-columns: 1fr;
+      }
+
+      .television {
+        padding: 13px;
+        border-radius: 25px;
+      }
+
+      .television-face {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .tube-console {
+        display: none;
+      }
+
+      .screen-bezel {
+        padding: 8px;
+      }
+
+      .crt-screen {
+        height: 70vh;
+        min-height: 430px;
+        border-radius: 9% / 5%;
+      }
+
+      .prompt-copy {
+        width: min(var(--prompt-width), calc(100% - 30px));
+      }
+
+      .readout {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .001ms !important;
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+      }
+
+      .crt-screen::before {
+        opacity: .22;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">TP</div>
+      <div>
+        <p class="eyebrow">Field instrument no. 01</p>
+        <h1>Tube Prompt</h1>
+      </div>
+    </div>
+    <p class="privacy-note"><strong>Your words stay here.</strong> This is one self-contained HTML file. It has no accounts, analytics, network calls, camera, or microphone. Drafts save only in this browser.</p>
+  </header>
+
+  <main class="teleprompter-app" id="teleprompter-app">
+    <div class="workbench">
+      <section class="setup-panel" aria-labelledby="setup-title">
+        <div class="panel-heading">
+          <h2 id="setup-title">Set the copy</h2>
+          <p>Paste anything. Lines in [brackets] become quiet stage directions and are not counted as spoken words.</p>
+        </div>
+        <div class="panel-body">
+          <div class="field">
+            <label class="field-label" for="script-title">Script name</label>
+            <input id="script-title" type="text" maxlength="120" value="LoadShed — 90 second demo" autocomplete="off">
+          </div>
+
+          <div class="field script-field">
+            <label class="field-label" for="script-input">Script <span class="field-output" id="word-output">0 spoken words</span></label>
+            <textarea id="script-input" spellcheck="true">[RESULT — PRESSURED DESK]
+Here is the result. This page got slow, and the agent knew exactly what it could cut—and what it had to protect.
+
+[RESTORE TO IDLE]
+A live control room or shopping flow knows which human task must survive. DOM automation does not. Loadshed publishes that priority as a WebMCP contract.
+
+[SHOW SIX TOOLS; INSPECT AND LIST OPTIONS]
+The client discovers six page-defined tools. It can inspect the current promise and browser signals, list the protected work, and see the next measured cut—without guessing selectors.
+
+[SET CONTRACT; PROTECT MIXER STATUS]
+Set a one-hundred-millisecond contract for Live trace, then protect Mixer status. The agent acts only through page-owned IDs and callbacks. The page shows both agent-stamped receipts.
+
+[RAISE CROWD LOAD; PERSON CLICKS TAP]
+Now the person raises the crowd load and supplies the click. Loadshed measures a long frame and cuts the registered crowd work from four hundred eighty to forty-eight. The live trace and mixer stay useful.
+
+[READ RECEIPTS]
+The receipt says what changed, who caused it, which signal justified it, and what evidence is still missing. Injected clicks never become trusted evidence.
+
+[TURN PROMISE OFF; FLASH SALE]
+Turn the promise off, and full fidelity returns. Sale uses the same six tools with a different page-owned priority: Hold my size. Loadshed is a small runtime for honest human-agent responsiveness contracts on the open web.</textarea>
+          </div>
+
+          <div class="file-row">
+            <label class="file-button" for="file-input">Load .txt or .md
+              <input id="file-input" type="file" accept=".txt,.md,text/plain,text/markdown">
+            </label>
+            <button id="download-button" type="button">Download copy</button>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="speed-control">Pace <output class="field-output" id="speed-output" for="speed-control">145 words/min</output></label>
+            <input id="speed-control" type="range" min="70" max="240" step="5" value="145">
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="size-control">Type size <output class="field-output" id="size-output" for="size-control">64 px</output></label>
+            <input id="size-control" type="range" min="32" max="112" step="2" value="64">
+          </div>
+
+          <div class="inline-fields">
+            <div class="field">
+              <label class="field-label" for="leading-control">Line spacing <output class="field-output" id="leading-output" for="leading-control">1.32</output></label>
+              <input id="leading-control" type="range" min="1.05" max="1.7" step="0.05" value="1.3">
+            </div>
+            <div class="field">
+              <label class="field-label" for="width-control">Line width <output class="field-output" id="width-output" for="width-control">20 ch</output></label>
+              <input id="width-control" type="range" min="12" max="32" step="1" value="20">
+            </div>
+          </div>
+
+          <div class="inline-fields">
+            <div class="field">
+              <label class="field-label" for="focus-control">Eye line <output class="field-output" id="focus-output" for="focus-control">42%</output></label>
+              <input id="focus-control" type="range" min="25" max="60" step="1" value="42">
+            </div>
+            <div class="field">
+              <label class="field-label" for="countdown-control">Countdown</label>
+              <select id="countdown-control">
+                <option value="0">None</option>
+                <option value="3" selected>3 seconds</option>
+                <option value="5">5 seconds</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="switches" aria-label="Prompt options">
+            <label class="switch" for="mirror-toggle">
+              <input id="mirror-toggle" type="checkbox">
+              Mirror prompt text only
+            </label>
+            <label class="switch" for="fullscreen-toggle">
+              <input id="fullscreen-toggle" type="checkbox" checked>
+              Enter fullscreen on start
+            </label>
+          </div>
+
+          <div class="transport" aria-label="Prompt transport">
+            <button class="start-button" id="start-button" type="button">Begin one-shot</button>
+            <button id="pause-button" type="button" disabled>Pause</button>
+            <button id="restart-button" type="button">Restart</button>
+            <button id="fullscreen-button" type="button">Fullscreen</button>
+            <button id="sample-button" type="button">Restore demo script</button>
+          </div>
+          <p class="save-state" id="save-state" role="status">Ready. Changes save locally.</p>
+        </div>
+      </section>
+
+      <div class="television-column">
+        <section class="television" aria-label="Teleprompter preview">
+          <div class="television-face">
+            <div class="screen-bezel">
+              <div class="crt-screen" id="prompt-screen" tabindex="0" aria-label="Prompt preview. Double-click to pause or resume.">
+                <div class="countdown" id="countdown" aria-hidden="true" hidden></div>
+                <div class="focus-guide" aria-hidden="true"></div>
+                <article class="prompt-copy" id="prompt-copy"></article>
+              </div>
+            </div>
+            <aside class="tube-console" aria-hidden="true">
+              <div class="speaker"></div>
+              <div class="dial">pace</div>
+              <div class="dial">focus</div>
+              <div class="pilot-light"></div>
+              <div class="maker-plate">Tube Prompt<br>Local apparatus</div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="readout" aria-label="Script timing">
+          <div class="readout-item">State<strong id="state-readout">Ready to rehearse</strong></div>
+          <div class="readout-item">Estimated<strong id="duration-readout">0:00</strong></div>
+          <div class="readout-item">Elapsed<strong id="elapsed-readout">0:00</strong></div>
+          <div class="readout-item">Remaining<strong id="remaining-readout">0:00</strong></div>
+          <progress class="progress-track" id="progress-readout" value="0" max="100" aria-label="Prompt progress">0%</progress>
+        </section>
+
+        <p class="shortcut-card"><strong>On-air keys:</strong> <kbd>Space</kbd> pause/resume · <kbd>↑</kbd><kbd>↓</kbd> pace · <kbd>+</kbd><kbd>−</kbd> type · <kbd>M</kbd> mirror · <kbd>R</kbd> restart · <kbd>F</kbd> fullscreen · <kbd>E</kbd> or <kbd>Esc</kbd> return to editor. Double-click the glass to pause.</p>
+      </div>
+    </div>
+  </main>
+
+  <p class="screen-reader-status" id="screen-reader-status" aria-live="polite"></p>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const STORAGE_KEY = 'tube-prompt:v1';
+      const SAMPLE_TITLE = 'LoadShed — 90 second demo';
+      const SAMPLE_SCRIPT = document.getElementById('script-input').value;
+      const root = document.documentElement;
+      const body = document.body;
+      const app = document.getElementById('teleprompter-app');
+      const scriptTitle = document.getElementById('script-title');
+      const scriptInput = document.getElementById('script-input');
+      const promptScreen = document.getElementById('prompt-screen');
+      const promptCopy = document.getElementById('prompt-copy');
+      const countdown = document.getElementById('countdown');
+      const speedControl = document.getElementById('speed-control');
+      const sizeControl = document.getElementById('size-control');
+      const leadingControl = document.getElementById('leading-control');
+      const widthControl = document.getElementById('width-control');
+      const focusControl = document.getElementById('focus-control');
+      const countdownControl = document.getElementById('countdown-control');
+      const mirrorToggle = document.getElementById('mirror-toggle');
+      const fullscreenToggle = document.getElementById('fullscreen-toggle');
+      const startButton = document.getElementById('start-button');
+      const pauseButton = document.getElementById('pause-button');
+      const restartButton = document.getElementById('restart-button');
+      const fullscreenButton = document.getElementById('fullscreen-button');
+      const sampleButton = document.getElementById('sample-button');
+      const fileInput = document.getElementById('file-input');
+      const downloadButton = document.getElementById('download-button');
+      const saveState = document.getElementById('save-state');
+      const wordOutput = document.getElementById('word-output');
+      const speedOutput = document.getElementById('speed-output');
+      const sizeOutput = document.getElementById('size-output');
+      const leadingOutput = document.getElementById('leading-output');
+      const widthOutput = document.getElementById('width-output');
+      const focusOutput = document.getElementById('focus-output');
+      const stateReadout = document.getElementById('state-readout');
+      const durationReadout = document.getElementById('duration-readout');
+      const elapsedReadout = document.getElementById('elapsed-readout');
+      const remainingReadout = document.getElementById('remaining-readout');
+      const progressReadout = document.getElementById('progress-readout');
+      const screenReaderStatus = document.getElementById('screen-reader-status');
+
+      let runState = 'ready';
+      let frameId = 0;
+      let countdownTimer = 0;
+      let saveTimer = 0;
+      let lastFrameTime = 0;
+      let elapsedMs = 0;
+      let spokenWords = 0;
+      let countdownRemaining = 0;
+      let pausedDuringCountdown = false;
+
+      function isCue(block) {
+        const value = block.trim();
+        return /^\[[\s\S]+\]$/.test(value);
+      }
+
+      function parseBlocks(value) {
+        const blocks = [];
+        const sections = value.replace(/\r\n?/g, '\n').split(/\n\s*\n/g);
+        for (const section of sections) {
+          let paragraph = [];
+          const flushParagraph = () => {
+            const text = paragraph.join('\n').trim();
+            if (text) blocks.push(text);
+            paragraph = [];
+          };
+          for (const line of section.split('\n')) {
+            if (isCue(line)) {
+              flushParagraph();
+              blocks.push(line.trim());
+            } else {
+              paragraph.push(line);
+            }
+          }
+          flushParagraph();
+        }
+        return blocks;
+      }
+
+      function countWords(value) {
+        const spoken = parseBlocks(value).filter((block) => !isCue(block)).join(' ').trim();
+        return spoken ? spoken.split(/\s+/u).length : 0;
+      }
+
+      function renderScript() {
+        const blocks = parseBlocks(scriptInput.value);
+        const fragment = document.createDocumentFragment();
+        spokenWords = countWords(scriptInput.value);
+
+        if (!blocks.length) {
+          const empty = document.createElement('p');
+          empty.className = 'empty-script';
+          empty.textContent = 'Paste a script in the editor to begin.';
+          fragment.appendChild(empty);
+        } else {
+          for (const block of blocks) {
+            const paragraph = document.createElement('p');
+            paragraph.textContent = block;
+            if (isCue(block)) paragraph.className = 'cue';
+            fragment.appendChild(paragraph);
+          }
+        }
+
+        promptCopy.replaceChildren(fragment);
+        wordOutput.textContent = `${spokenWords} spoken ${spokenWords === 1 ? 'word' : 'words'}`;
+        updateReadouts();
+      }
+
+      function formatTime(totalSeconds) {
+        const safeSeconds = Math.max(0, Math.round(Number.isFinite(totalSeconds) ? totalSeconds : 0));
+        const minutes = Math.floor(safeSeconds / 60);
+        const seconds = safeSeconds % 60;
+        return `${minutes}:${String(seconds).padStart(2, '0')}`;
+      }
+
+      function totalDurationSeconds() {
+        return spokenWords ? (spokenWords / Number(speedControl.value)) * 60 : 0;
+      }
+
+      function scrollDistance() {
+        return Math.max(0, promptScreen.scrollHeight - promptScreen.clientHeight);
+      }
+
+      function pixelsPerSecond() {
+        const duration = totalDurationSeconds();
+        return duration > 0 ? scrollDistance() / duration : 0;
+      }
+
+      function updateReadouts() {
+        const distance = scrollDistance();
+        const progress = distance > 0 ? Math.min(1, promptScreen.scrollTop / distance) : 0;
+        const speed = pixelsPerSecond();
+        const remaining = speed > 0 ? Math.max(0, distance - promptScreen.scrollTop) / speed : 0;
+
+        durationReadout.textContent = formatTime(totalDurationSeconds());
+        elapsedReadout.textContent = formatTime(elapsedMs / 1000);
+        remainingReadout.textContent = formatTime(remaining);
+        progressReadout.value = Math.round(progress * 1000) / 10;
+        progressReadout.textContent = `${Math.round(progress * 100)}%`;
+      }
+
+      function updatePromptInsets() {
+        const screenHeight = promptScreen.clientHeight;
+        const focusRatio = Number(focusControl.value) / 100;
+        promptCopy.style.setProperty('--prompt-top-pad', `${Math.round(screenHeight * focusRatio)}px`);
+        promptCopy.style.setProperty('--prompt-bottom-pad', `${Math.round(screenHeight * (1 - focusRatio))}px`);
+      }
+
+      function applySettings() {
+        root.style.setProperty('--prompt-size', `${sizeControl.value}px`);
+        root.style.setProperty('--prompt-leading', leadingControl.value);
+        root.style.setProperty('--prompt-width', `${widthControl.value}ch`);
+        root.style.setProperty('--focus-position', `${focusControl.value}%`);
+        promptCopy.classList.toggle('is-mirrored', mirrorToggle.checked);
+        speedOutput.textContent = `${speedControl.value} words/min`;
+        sizeOutput.textContent = `${sizeControl.value} px`;
+        leadingOutput.textContent = Number(leadingControl.value).toFixed(2);
+        widthOutput.textContent = `${widthControl.value} ch`;
+        focusOutput.textContent = `${focusControl.value}%`;
+        requestAnimationFrame(() => {
+          updatePromptInsets();
+          updateReadouts();
+        });
+      }
+
+      function setState(nextState, announcement) {
+        runState = nextState;
+        pauseButton.disabled = nextState === 'ready' || nextState === 'complete' || !spokenWords;
+        pauseButton.textContent = nextState === 'paused' ? 'Resume' : 'Pause';
+        const labels = {
+          ready: 'Ready to rehearse',
+          countdown: 'Stand by',
+          running: 'Rolling',
+          paused: 'Paused',
+          complete: 'End of script'
+        };
+        stateReadout.textContent = labels[nextState];
+        if (announcement) screenReaderStatus.textContent = announcement;
+      }
+
+      function cancelMotion() {
+        if (frameId) cancelAnimationFrame(frameId);
+        if (countdownTimer) clearTimeout(countdownTimer);
+        frameId = 0;
+        countdownTimer = 0;
+        lastFrameTime = 0;
+      }
+
+      function tick(now) {
+        if (runState !== 'running') return;
+        if (!lastFrameTime) lastFrameTime = now;
+        const delta = Math.min(100, now - lastFrameTime);
+        lastFrameTime = now;
+        const distance = scrollDistance();
+        const nextPosition = Math.min(distance, promptScreen.scrollTop + (pixelsPerSecond() * delta / 1000));
+        promptScreen.scrollTop = nextPosition;
+        elapsedMs += delta;
+        updateReadouts();
+
+        if (distance === 0 || nextPosition >= distance - .5) {
+          setState('complete', 'End of script. Press Escape or E to return to the editor.');
+          frameId = 0;
+          return;
+        }
+        frameId = requestAnimationFrame(tick);
+      }
+
+      function beginScrolling() {
+        countdown.hidden = true;
+        countdownRemaining = 0;
+        pausedDuringCountdown = false;
+        setState('running', 'Prompt rolling. Press Space to pause.');
+        lastFrameTime = 0;
+        frameId = requestAnimationFrame(tick);
+      }
+
+      function beginCountdown(seconds) {
+        if (seconds <= 0) {
+          beginScrolling();
+          return;
+        }
+        pausedDuringCountdown = false;
+        countdownRemaining = seconds;
+        setState('countdown', `Starting in ${seconds}.`);
+        countdown.hidden = false;
+        countdown.textContent = seconds;
+        const step = () => {
+          countdownRemaining -= 1;
+          if (countdownRemaining <= 0) {
+            beginScrolling();
+            return;
+          }
+          countdown.textContent = countdownRemaining;
+          screenReaderStatus.textContent = `Starting in ${countdownRemaining}.`;
+          countdownTimer = window.setTimeout(step, 1000);
+        };
+        countdownTimer = window.setTimeout(step, 1000);
+      }
+
+      async function requestPromptFullscreen() {
+        if (document.fullscreenElement || !app.requestFullscreen) return;
+        try {
+          await app.requestFullscreen();
+        } catch (error) {
+          saveState.textContent = 'Fullscreen was blocked; the prompt is still rolling.';
+        }
+      }
+
+      function startOneShot() {
+        renderScript();
+        if (!spokenWords) {
+          scriptInput.focus();
+          screenReaderStatus.textContent = 'Add spoken copy before starting.';
+          return;
+        }
+        cancelMotion();
+        promptScreen.scrollTop = 0;
+        elapsedMs = 0;
+        body.classList.add('is-on-air');
+        updatePromptInsets();
+        if (fullscreenToggle.checked) void requestPromptFullscreen();
+        beginCountdown(Number(countdownControl.value));
+      }
+
+      function pause() {
+        if (runState !== 'running' && runState !== 'countdown') return;
+        pausedDuringCountdown = runState === 'countdown';
+        cancelMotion();
+        countdown.hidden = true;
+        setState('paused', 'Prompt paused. Press Space to resume.');
+        updateReadouts();
+      }
+
+      function resume() {
+        if (runState !== 'paused' || !spokenWords) return;
+        if (pausedDuringCountdown && countdownRemaining > 0) beginCountdown(countdownRemaining);
+        else beginScrolling();
+      }
+
+      function togglePause() {
+        if (runState === 'running' || runState === 'countdown') pause();
+        else if (runState === 'paused') resume();
+      }
+
+      function restart() {
+        cancelMotion();
+        promptScreen.scrollTop = 0;
+        elapsedMs = 0;
+        updateReadouts();
+        if (body.classList.contains('is-on-air')) beginCountdown(Number(countdownControl.value));
+        else setState('ready', 'Prompt returned to the beginning.');
+      }
+
+      async function exitToEditor() {
+        cancelMotion();
+        countdown.hidden = true;
+        body.classList.remove('is-on-air');
+        pausedDuringCountdown = false;
+        setState(promptScreen.scrollTop > 0 ? 'paused' : 'ready', 'Editor restored.');
+        if (document.fullscreenElement && document.exitFullscreen) {
+          try {
+            await document.exitFullscreen();
+          } catch (error) {
+            // Browser chrome still provides its own fullscreen exit.
+          }
+        }
+        requestAnimationFrame(() => startButton.focus());
+      }
+
+      async function toggleFullscreen() {
+        if (document.fullscreenElement) {
+          if (document.exitFullscreen) await document.exitFullscreen();
+          return;
+        }
+        if (!app.requestFullscreen) {
+          saveState.textContent = 'Fullscreen is not available in this browser.';
+          return;
+        }
+        try {
+          await app.requestFullscreen();
+        } catch (error) {
+          saveState.textContent = 'Fullscreen was blocked by the browser.';
+        }
+      }
+
+      function serializeState() {
+        return {
+          title: scriptTitle.value,
+          script: scriptInput.value,
+          speed: speedControl.value,
+          size: sizeControl.value,
+          leading: leadingControl.value,
+          width: widthControl.value,
+          focus: focusControl.value,
+          countdown: countdownControl.value,
+          mirror: mirrorToggle.checked,
+          fullscreen: fullscreenToggle.checked
+        };
+      }
+
+      function saveLocalState() {
+        if (saveTimer) clearTimeout(saveTimer);
+        saveState.textContent = 'Saving locally…';
+        saveTimer = window.setTimeout(() => {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeState()));
+            saveState.textContent = 'Saved in this browser only.';
+          } catch (error) {
+            saveState.textContent = 'Local saving is unavailable; download a copy to keep it.';
+          }
+        }, 180);
+      }
+
+      function restoreLocalState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          const saved = JSON.parse(raw);
+          if (typeof saved.title === 'string') scriptTitle.value = saved.title;
+          if (typeof saved.script === 'string') scriptInput.value = saved.script;
+          const ranges = [
+            [speedControl, saved.speed],
+            [sizeControl, saved.size],
+            [leadingControl, saved.leading],
+            [widthControl, saved.width],
+            [focusControl, saved.focus]
+          ];
+          for (const [control, value] of ranges) {
+            if (value !== undefined && Number(value) >= Number(control.min) && Number(value) <= Number(control.max)) {
+              control.value = value;
+            }
+          }
+          if (['0', '3', '5'].includes(String(saved.countdown))) countdownControl.value = String(saved.countdown);
+          if (typeof saved.mirror === 'boolean') mirrorToggle.checked = saved.mirror;
+          if (typeof saved.fullscreen === 'boolean') fullscreenToggle.checked = saved.fullscreen;
+          saveState.textContent = 'Restored your local draft.';
+        } catch (error) {
+          saveState.textContent = 'The saved draft was unreadable; the built-in script is ready.';
+        }
+      }
+
+      function downloadScript() {
+        const safeName = (scriptTitle.value.trim() || 'teleprompter-script')
+          .replace(/[^a-z0-9._-]+/gi, '-')
+          .replace(/^-+|-+$/g, '') || 'teleprompter-script';
+        const blob = new Blob([scriptInput.value], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${safeName}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        saveState.textContent = 'Downloaded a plain-text copy.';
+      }
+
+      function loadFile(file) {
+        if (!file) return;
+        if (file.size > 2_000_000) {
+          saveState.textContent = 'That file is over 2 MB. Choose a smaller text script.';
+          fileInput.value = '';
+          return;
+        }
+        const reader = new FileReader();
+        reader.addEventListener('load', () => {
+          scriptInput.value = typeof reader.result === 'string' ? reader.result : '';
+          scriptTitle.value = file.name.replace(/\.(txt|md)$/i, '') || 'Imported script';
+          promptScreen.scrollTop = 0;
+          elapsedMs = 0;
+          renderScript();
+          saveLocalState();
+          saveState.textContent = `Loaded ${file.name}.`;
+          fileInput.value = '';
+        });
+        reader.addEventListener('error', () => {
+          saveState.textContent = 'That file could not be read.';
+          fileInput.value = '';
+        });
+        reader.readAsText(file);
+      }
+
+      function restoreSample() {
+        const customized = scriptInput.value !== SAMPLE_SCRIPT || scriptTitle.value !== SAMPLE_TITLE;
+        if (customized && !window.confirm('Replace the current editor contents with the built-in LoadShed script?')) return;
+        scriptTitle.value = SAMPLE_TITLE;
+        scriptInput.value = SAMPLE_SCRIPT;
+        promptScreen.scrollTop = 0;
+        elapsedMs = 0;
+        renderScript();
+        saveLocalState();
+        saveState.textContent = 'Built-in LoadShed script restored.';
+      }
+
+      function nudgeRange(control, amount) {
+        const before = Number(control.value);
+        const next = Math.min(Number(control.max), Math.max(Number(control.min), before + amount));
+        if (next === before) return;
+        control.value = String(next);
+        applySettings();
+        saveLocalState();
+      }
+
+      startButton.addEventListener('click', startOneShot);
+      pauseButton.addEventListener('click', togglePause);
+      restartButton.addEventListener('click', restart);
+      fullscreenButton.addEventListener('click', () => void toggleFullscreen());
+      sampleButton.addEventListener('click', restoreSample);
+      downloadButton.addEventListener('click', downloadScript);
+      fileInput.addEventListener('change', () => loadFile(fileInput.files[0]));
+      promptScreen.addEventListener('dblclick', togglePause);
+
+      scriptInput.addEventListener('input', () => {
+        promptScreen.scrollTop = 0;
+        elapsedMs = 0;
+        renderScript();
+        setState('ready');
+        saveLocalState();
+      });
+      scriptTitle.addEventListener('input', saveLocalState);
+
+      for (const control of [speedControl, sizeControl, leadingControl, widthControl, focusControl]) {
+        control.addEventListener('input', () => {
+          applySettings();
+          saveLocalState();
+        });
+      }
+      for (const control of [countdownControl, mirrorToggle, fullscreenToggle]) {
+        control.addEventListener('change', () => {
+          applySettings();
+          saveLocalState();
+        });
+      }
+
+      document.addEventListener('keydown', (event) => {
+        if (!body.classList.contains('is-on-air')) return;
+        const key = event.key.toLowerCase();
+        if (event.code === 'Space') {
+          event.preventDefault();
+          togglePause();
+        } else if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          nudgeRange(speedControl, Number(speedControl.step));
+        } else if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          nudgeRange(speedControl, -Number(speedControl.step));
+        } else if (event.key === '+' || event.key === '=') {
+          event.preventDefault();
+          nudgeRange(sizeControl, Number(sizeControl.step));
+        } else if (event.key === '-' || event.key === '_') {
+          event.preventDefault();
+          nudgeRange(sizeControl, -Number(sizeControl.step));
+        } else if (key === 'm') {
+          event.preventDefault();
+          mirrorToggle.checked = !mirrorToggle.checked;
+          applySettings();
+          saveLocalState();
+        } else if (key === 'r') {
+          event.preventDefault();
+          restart();
+        } else if (key === 'f') {
+          event.preventDefault();
+          void toggleFullscreen();
+        } else if (key === 'e' || event.key === 'Escape') {
+          event.preventDefault();
+          void exitToEditor();
+        }
+      });
+
+      document.addEventListener('fullscreenchange', () => {
+        updatePromptInsets();
+        updateReadouts();
+        if (!document.fullscreenElement && body.classList.contains('is-on-air')) {
+          void exitToEditor();
+        }
+      });
+
+      window.addEventListener('resize', () => requestAnimationFrame(() => {
+        updatePromptInsets();
+        updateReadouts();
+      }));
+      window.addEventListener('beforeunload', () => {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeState()));
+        } catch (error) {
+          // Leaving the page must not be blocked when storage is unavailable.
+        }
+      });
+
+      restoreLocalState();
+      renderScript();
+      applySettings();
+      setState('ready');
+    })();
+  </script>
+</body>
+</html>

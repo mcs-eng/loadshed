@@ -61,6 +61,20 @@ Run all repository tests from the repository root:
 node --test test\*.test.js
 ```
 
+## Recording utility
+
+[Tube Prompt](teleprompter/) is a reusable, single-file teleprompter made for the demo narration.
+It opens directly from disk or at
+[mcs-eng.github.io/loadshed/teleprompter/](https://mcs-eng.github.io/loadshed/teleprompter/),
+and it has no network, account, camera, or microphone access. Paste any script, set pace and type
+size, then choose **Begin one-shot** for a clean fullscreen countdown and automatic scroll. Drafts
+stay in that browser's local storage; a plain-text download keeps a portable copy.
+
+While rolling, use `Space` to pause, arrow keys to change pace, `+`/`-` to resize, `M` to mirror
+only the prompt, `R` to restart, and `E` or `Escape` to return to the editor. The built-in LoadShed
+script treats lines in brackets as unspoken stage directions, so its word count and timing estimate
+cover only the narration.
+
 ## What WebMCP exposes
 
 `src/loadshed.js` registers six imperative tools on the top-level document:
@@ -89,6 +103,7 @@ receipt schema, trust model, and copy-paste integration example.
 | [`src/loadshed.js`](src/loadshed.js) | Reusable, page-agnostic controller and WebMCP tool surface. |
 | [`index.html`](index.html) | Canonical Hold the Line judge demo. |
 | [`sale/index.html`](sale/index.html) | Second skin and real handler-lateness example. |
+| [`teleprompter/index.html`](teleprompter/index.html) | Offline, reusable recording prompt with the demo script preloaded. |
 | [`src/sale-lateness.js`](src/sale-lateness.js) | Small pure helper for event-to-handler delay. |
 | [`test/`](test/) | Node tests for controller, trust, lifecycle, demo wiring, and release hygiene. |
 | [`scripts/Export-PublicRelease.ps1`](scripts/Export-PublicRelease.ps1) | Creates a product-only public release from an explicit allowlist. |

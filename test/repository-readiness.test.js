@@ -4,10 +4,11 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
+const vm = require('node:vm');
 
 const root = path.resolve(__dirname, '..');
 
-test('reviewers get a runnable root README with the canonical judge path', () => {
+test('reviewers get runnable judge and reusable teleprompter paths', () => {
   const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
   assert.match(readme, /https:\/\/mcs-eng\.github\.io\/loadshed\//);
   assert.match(readme, /https:\/\/github\.com\/mcs-eng\/loadshed/);
@@ -16,7 +17,24 @@ test('reviewers get a runnable root README with the canonical judge path', () =>
   assert.match(readme, /node --test test\\\*\.test\.js/);
   assert.match(readme, /inspect_responsiveness/);
   assert.match(readme, /Chrome 149\+/);
+  assert.match(readme, /teleprompter\//i);
   assert.match(readme, /MIT/i);
+
+  const prompter = fs.readFileSync(path.join(root, 'teleprompter', 'index.html'), 'utf8');
+  assert.match(prompter, /<textarea[^>]+id="script-input"/);
+  assert.match(prompter, /id="start-button"/);
+  assert.match(prompter, /id="pause-button"/);
+  assert.match(prompter, /id="speed-control"[^>]+type="range"/);
+  assert.match(prompter, /id="size-control"[^>]+type="range"/);
+  assert.match(prompter, /id="mirror-toggle"[^>]+type="checkbox"/);
+  assert.match(prompter, /requestFullscreen/);
+  assert.match(prompter, /localStorage/);
+  assert.match(prompter, /prefers-reduced-motion/);
+  assert.doesNotMatch(prompter, /<script[^>]+src=|<link[^>]+rel="stylesheet"/i);
+  assert.doesNotMatch(prompter, /\b(?:fetch|XMLHttpRequest|WebSocket|getUserMedia)\s*\(/);
+  const inlineScript = prompter.match(/<script>([\s\S]+)<\/script>/)?.[1];
+  assert.ok(inlineScript, 'teleprompter must contain its executable behavior inline');
+  assert.doesNotThrow(() => new vm.Script(inlineScript), 'teleprompter inline script must parse');
 });
 
 test('submission handoff records published artifacts without overstating operator-owned work', () => {
@@ -48,6 +66,7 @@ test('public release export is allowlisted and excludes internal development art
   assert.match(exporter, /'index\.html'/);
   assert.match(exporter, /'assets\/loadshed-live-proof\.jpg'/);
   assert.match(exporter, /'src\/loadshed\.js'/);
+  assert.match(exporter, /'teleprompter\/index\.html'/);
   const testFiles = fs.readdirSync(path.join(root, 'test')).filter((name) => name.endsWith('.test.js'));
   for (const name of testFiles) {
     assert.ok(exporter.includes(`'test/${name}'`), `public export must include test/${name}`);

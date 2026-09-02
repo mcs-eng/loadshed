@@ -23,6 +23,7 @@ $releaseFiles = @(
     'index.html'
     'picker/index.html'
     'sale/index.html'
+    'teleprompter/index.html'
     'src/loadshed.js'
     'src/loadshed-README.md'
     'src/sale-lateness.js'
