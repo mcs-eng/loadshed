@@ -5,7 +5,7 @@ a supported WebMCP browser, video upload, or final submission authority.
 
 ## Current submission state
 
-- Source tree and local tests — **READY — 49/49 Node tests pass.**
+- Source tree and local tests — **READY — 50/50 Node tests pass on public `8b4ea73` (run 2026-09-02).**
 - Live URL — **DEPLOYED AND WEBMCP-QUALIFIED — <https://mcs-eng.github.io/loadshed/>.** Anonymous
   HTTPS checks, an Edge 152 smoke, and a live Codex in-app-browser WebMCP run passed on August 29,
   2026. The rules-named confirmation was completed on September 1, 2026 in ChatGPT's in-app browser against public commit `74c13a8`; see the September 1 receipt below.
@@ -52,6 +52,50 @@ The reusable `src/loadshed.js` runtime registers six tools with
 click evidence, applies only page-registered callbacks, and fails closed when the browser cannot
 support an honest promise. The Desk and Sale pages demonstrate the same engine protecting different
 page-owned outcomes.
+
+## Devpost required answers (drafted 2026-09-01)
+
+The Devpost project form asks four things of the text description; confirm the prompt wording on the form before pasting, since the four prompts below are drafted from memory of the form and carry no field id. Paste each answer under its prompt; every figure below comes from the September 1 receipt against public commit `74c13a8`.
+
+**Why is this use case a strong fit for WebMCP?**
+A page under load knows which human task must survive; an agent reading the DOM does not. Loadshed lets the page publish that priority as six WebMCP tools registered with `document.modelContext.registerTool`, covering a smoothness contract, a protected element, an ordered ladder of disposable work, and receipts for every cut and every state-touching refusal. The agent negotiates against the page's own contract instead of guessing from selectors.
+
+**How does it create a better user experience?**
+Cuts are bounded, ordered, reversible, and visible. On the deployed Desk, measured on September 1 against public commit `74c13a8`, a 334.6 ms long frame cut Crowd from 480 to 48 while the live trace and mixer stayed usable, and the page-measured interaction went from 205.3 ms before the cut to 0.9 ms after. The person keeps the pressure controls and the trusted click; the agent can inspect, negotiate, protect, adapt, and audit without ever inventing evidence.
+
+**What can people and agents do together that was difficult or impossible before?**
+An agent can set a 100 ms promise for a named element and protect a second target, then read structured receipts that agree with what the person sees. The person supplies the physical click that makes latency evidence trustworthy; the runtime rejects agent-injected clicks and says so. Neither side could do this alone: the agent cannot produce trusted interaction evidence, and the person cannot read frame timing.
+
+**Briefly explain how you implemented WebMCP.**
+`src/loadshed.js` is one reusable runtime. It registers `inspect_responsiveness`, `get_adaptation_options`, `set_smoothness_contract`, `protect_experience_element`, `apply_adaptation`, and `get_intervention_receipts`, observes `long-animation-frame` and interaction timing, applies only page-registered callbacks in declared order, and fails closed when the browser cannot support an honest promise. The Desk and Sale pages prove the same engine protecting different page-owned outcomes with no knowledge of each other's DOM. 50 Node tests, 46 of them on the runtime and demos, cover the project; the live site serves public `main` at `8b4ea73`, which is the tagged `e031503` runtime plus one CSS fix that stops receipt history from stretching the protected trace.
+
+## Devpost story (short version for the description box, drafted 2026-09-02)
+
+The organizers' September 2 email asks for a description written like a human, specific, with the story kept out of the video. Paste this over the long description if you want a version a judge can read in one minute. The four required answers stay in their own fields.
+
+**When a page gets slow, who decides what survives?**
+
+A live show desk, a checkout on a mid-range phone, a control room dashboard: each one already has a private answer. Somebody hand-tuned what degrades first. An agent looking at the DOM cannot see that answer, so it either guesses or does nothing.
+
+Loadshed lets the page publish the answer. The page declares a click-latency ceiling, the element that must stay useful, and an ordered ladder of work it is willing to drop. It registers six WebMCP tools with `document.modelContext.registerTool`, so an agent can inspect the promise, negotiate the ceiling, protect a second element, apply or reverse one bounded cut, and read a receipt for everything that happened.
+
+On the deployed Desk, a person drags crowd load to maximum and clicks once. The page measures a long frame of about 320 ms, drops the crowd layer from 480 items to 48, and leaves the live trace and mixer untouched. The agent set that contract, and the receipt names the frame signal, the caller, and the click that proved it. Turn the promise off and everything comes back.
+
+The honest part: the runtime rejects agent-injected clicks as evidence, refuses cuts on protected or pinned work, and fails closed when the browser has no frame-hitch signal. The Sale page proves the same runtime protects a different task, Hold my size, without knowing the Desk's DOM.
+
+No build, no backend, MIT licensed, 50 Node tests. The live site, the repository, and the dated qualification receipts are linked below.
+
+## Thursday pre-submit checklist
+
+Submissions close Thursday, September 3, 2026 at 1:00 PM Pacific, 4:00 PM Eastern. Do these in order on Wednesday evening and Thursday morning.
+
+1. Record the video from the private clone's video kit (not part of the public export): eight short clips in ChatGPT's in-app browser on the live site, pasted prompts, no live typing, waits trimmed in the edit, captions for the tool names, the working result in the first seconds. Confirm the runtime is under 3:00 and the audio names WebMCP and what was built.
+2. Upload it to YouTube as public. Open the link in a private window to confirm it plays without sign-in.
+3. The video clips are shot in ChatGPT's in-app browser against public `8b4ea73`, so they double as a tools-ready smoke of the deployed head. Only the ten-step hosted qualification above earns an entry in the tested-clients row; if the shoot runs those ten steps, record them there as "ChatGPT in-app browser (September 2, 2026) against public `8b4ea73`".
+4. On the Devpost form, paste the four answers above, the live URL, and the public repository URL <https://github.com/mcs-eng/loadshed>. Replace the YouTube placeholder with the real URL. Answer the four operator-choice fields `28249`, `28250`, `28259`, and `28260` from the final-form map below, and confirm the project's team roster on Devpost matches the submitter type chosen in `28249`.
+5. Confirm the public repository still shows the MIT license in the About panel. Public `main` advanced past the tag on September 2 (`8b4ea73`, one CSS fix and one test); either move the annotated tag `v0.1.0-submission` to `8b4ea73` before submitting, or leave it on `e031503` and keep the answer above, which names both. Adding repository topics (`webmcp`, `hackathon`, `web-performance`, `agents`) in the About panel takes one minute and helps a judge place the project.
+6. Read the whole form once as a judge would. Then submit before 4:00 PM Eastern, not at it.
+7. Keep the confirmation page as a PDF outside this public repository and note the submission time in the private clone.
 
 ## Hosted qualification
 
@@ -266,7 +310,7 @@ The account is already registered for the challenge. The live submission form wa
 | `28254` Live URL | `https://mcs-eng.github.io/loadshed/` |
 | `28255` Testing instructions | Open the root in ChatGPT's in-app browser or Chrome 149+ with WebMCP enabled; confirm **tools ready**; inspect responsiveness and options; set a 100 ms `live-trace` contract; protect `mark-note`; move Crowd load to 100%; click Tap yourself; wait for Crowd 480 to 48; compare the visible rail with `get_intervention_receipts`; turn the promise off; repeat on Sale with `hold-size` and `hold-note`. No credentials are required. |
 | `28256` Public code repository | `https://github.com/mcs-eng/loadshed` |
-| `28257` Tested clients | ChatGPT in-app browser (September 1, 2026): full six-tool Desk and Sale qualification with physical clicks against public `74c13a8`. Codex in-app browser (August 29): live six-tool Desk and Sale qualification. Edge 152: runtime and reduced-motion smoke, not a WebMCP-agent qualification. **If a named-client pass against `e031503` is run, name it here.** |
+| `28257` Tested clients | ChatGPT in-app browser (September 1, 2026): full six-tool Desk and Sale qualification with physical clicks against public `74c13a8`. Codex in-app browser (August 29): live six-tool Desk and Sale qualification. Edge 152: runtime and reduced-motion smoke, not a WebMCP-agent qualification. **If the September 2 video shoot runs the ten hosted steps in ChatGPT's in-app browser against public `8b4ea73`, name it here.** |
 | `28258` AI tools used | OpenAI Codex, including Sol, Terra, and Luna review passes; Anthropic Claude; xAI Grok; and Agy. |
 | `28259` Learning level | **OPERATOR:** choose None, Moderate, or Significant. |
 | `28260` Career AI value | **OPERATOR:** choose Yes or No. |
@@ -292,10 +336,16 @@ submission.
   (pushed 2026-09-01).
 - [x] Devpost draft text updated 2026-09-01: test count 49, both "320.157 ms" figures rounded
   to "about 320 ms", and one paragraph naming `e031503` and the post-merge smoke.
+- [x] 2026-09-02: public `main` advanced to `8b4ea73` (PR #8, a CSS fix that keeps receipt
+  history from stretching the protected trace, plus one test). 50/50 tests pass on that head,
+  the live site serves it byte-for-byte, and the Devpost implementation answer names it.
+- [ ] Operator decision: move annotated tag `v0.1.0-submission` from `e031503` to `8b4ea73`, or
+  leave it and rely on the answer that names both.
 - [ ] Recommended, not required: repeat one named-client pass (ChatGPT in-app browser or
-  Chrome 149+) against public `e031503` and record it in the tested-clients row.
+  Chrome 149+) against public `8b4ea73` and record it in the tested-clients row. The video
+  shoot is the natural moment.
 - [ ] Record, edit, and publicly upload the narrated video; verify runtime is less than 3:00.
-  Use the private clone's `VIDEO-RECORDING-SHEET.md` at the mic (not part of the public export).
+  Use the private clone's video kit at the mic (not part of the public export).
 - [ ] Replace the remaining YouTube placeholder with the public video URL.
 - [x] Publish and review the project description in the Devpost draft.
 - [ ] Submit before September 3, 2026 at 1:00 PM Pacific, then preserve the submitted artifacts
