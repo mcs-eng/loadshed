@@ -48,7 +48,10 @@ test('public release export is allowlisted and excludes internal development art
   assert.match(exporter, /'index\.html'/);
   assert.match(exporter, /'assets\/loadshed-live-proof\.jpg'/);
   assert.match(exporter, /'src\/loadshed\.js'/);
-  assert.match(exporter, /'test\/repository-readiness\.test\.js'/);
+  const testFiles = fs.readdirSync(path.join(root, 'test')).filter((name) => name.endsWith('.test.js'));
+  for (const name of testFiles) {
+    assert.ok(exporter.includes(`'test/${name}'`), `public export must include test/${name}`);
+  }
   assert.doesNotMatch(exporter, /tournament\/|agy_draft|BUILD-DAY|BUILD-ORDER/);
   assert.doesNotMatch(exporter, /'desk\/|'pair\//);
 });

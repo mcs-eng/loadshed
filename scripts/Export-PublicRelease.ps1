@@ -28,6 +28,7 @@ $releaseFiles = @(
     'src/sale-lateness.js'
     'test/day4-regressions.test.js'
     'test/day5-regressions.test.js'
+    'test/day6-regressions.test.js'
     'test/repository-readiness.test.js'
     'scripts/Export-PublicRelease.ps1'
 )

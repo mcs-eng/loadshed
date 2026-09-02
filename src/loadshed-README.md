@@ -48,7 +48,7 @@ With a promise on, the controller considers a cut when all of these are true:
 
 - busywork is at least 70% for 1.4 seconds;
 - it has seen at least two 50 ms hitches; and
-- either a trusted interaction exceeds the declared ceiling, or pressure has persisted for 1.8 seconds without a trusted before-click.
+- either a trusted interaction exceeds the declared ceiling, or pressure has persisted for 1.8 seconds.
 
 After a cut, another automatic cut waits at least 900 ms and only sees hitches with a start time after that cut. A post-cut trusted interaction that still breaches the ceiling can justify the next cut; its receipt names the interaction. The original pre-cut interaction window remains the before/after pairing for the receipt. It restores shed work in reverse order after busywork stays at 30% or lower for 700 ms. Pages may override the pressure and restore constants at construction, but agents cannot change them through a tool.
 

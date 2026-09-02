@@ -9,8 +9,8 @@ measurement leaves a plain-language receipt.
 **Public source:** [github.com/mcs-eng/loadshed](https://github.com/mcs-eng/loadshed)
 
 The deployed Desk and Sale have each completed a live six-tool WebMCP run. See the
-[dated qualification receipt](SUBMISSION.md#qualification-receipt--august-29-2026) for the exact
-client, release, measured cuts, safety checks, and remaining human-evidence boundary.
+[rules-named September 1 qualification receipt](SUBMISSION.md#qualification-receipt--september-1-2026-rules-named-client)
+for the exact client, release, measured cuts, safety checks, and human-supplied evidence.
 
 ![Live Loadshed Desk showing an agent-set 100 ms contract, Crowd reduced from 480 to 48, the protected live trace, and intervention receipts](assets/loadshed-live-proof.jpg)
 
