@@ -5,10 +5,10 @@ a supported WebMCP browser, video upload, or final submission authority.
 
 ## Current submission state
 
-- Source tree and local tests — **READY — 34/34 Node tests pass.**
+- Source tree and local tests — **READY — 49/49 Node tests pass.**
 - Live URL — **DEPLOYED AND WEBMCP-QUALIFIED — <https://mcs-eng.github.io/loadshed/>.** Anonymous
   HTTPS checks, an Edge 152 smoke, and a live Codex in-app-browser WebMCP run passed on August 29,
-  2026. A final confirmation in the rules-named ChatGPT in-app browser or Chrome 149+ remains.
+  2026. The rules-named confirmation was completed on September 1, 2026 in ChatGPT's in-app browser against public commit `74c13a8`; see the September 1 receipt below.
 - Public repository — **PUBLIC — <https://github.com/mcs-eng/loadshed>.** It contains only the
   allowlisted release history, and GitHub detects the root MIT license.
 - YouTube video — **PENDING — operator must record narration, upload publicly, and provide the URL.**
@@ -114,6 +114,80 @@ cannot provide, and record the exact browser/version and before/after interactio
 Codex run proves the deployed six-tool loop and page behavior; it does not claim that final named-
 client or human-interaction evidence.
 
+## Qualification receipt — September 1, 2026 (rules-named client)
+
+Mason ran the full hosted checklist in ChatGPT's in-app browser (kept current by Mason; the
+app surfaced no explicit version string on September 1, 2026) against the deployed site. GitHub Pages served exact public commit
+`74c13a80d28e69618a68c76ffb53dc8f9f2e9486` (raw-vs-live byte comparison of `src/loadshed.js`
+returned MATCH: True). Both pages discovered all six tools ("tools ready" on each). All
+timestamps below are the ISO instants from the structured tool results.
+
+- **Desk, first pass:** agent-set 100 ms `live-trace` contract at 11:22:15Z (caller
+  `webmcp-agent`, receipt 2, visible "contract · agent" rail entry matched). Person raised
+  Crowd above 70% and physically clicked Tap; automatic shed at 11:23:15Z cut Crowd 480 to 48
+  with Live trace untouched. The 11:23:18Z measurement honestly reported the click landed
+  after the cut and that no trusted before-click was captured.
+- **Sale:** the runtime rejected injected click evidence (interaction id 0) at 11:24:56Z and
+  asked for a person instead. Agent-set 100 ms `hold-size` contract at 11:28:45Z (receipt 3).
+  Person set Aisle load to 100%, held the 8-inch size with a physical click; shed at 11:30:17Z
+  cut aisle shimmer full to hush with Hold my size untouched, and the card showed
+  "Aisle shimmer hush: 480 -> 48". Person turned the promise off; the 11:31:04Z restore,
+  override, and contract-off receipts recorded full fidelity held by choice.
+- **Desk, second pass (fresh load):** agent contract 11:32:27Z plus agent `mark-note`
+  protection 11:32:29Z. Person cut at 11:33:29Z carried frame evidence
+  (`long-animation-frame`, 334.6 ms), the 480-to-48 shed, and trusted page-measured
+  before/after clicks of 205.3 ms and 0.9 ms — the before/after interaction evidence the
+  August 29 run could not capture. The pin attempt on the last measured-relief step was
+  refused (`ok: false`, receipt 6). Protecting unknown id `fake-widget` was refused with
+  `ok: false` and `receiptId: null` — input validation rejections change nothing and mint no
+  receipt; the state-touching refusal did. `mark-note` protected and released cleanly
+  (receipts 3, 7, 8). `get_intervention_receipts` returned the complete coherent chain,
+  ids 1 through 8, matching the visible rail. Promise off at 11:43:14Z restored Crowd 48 to
+  480 with Live trace stayed, plus override and contract-off receipts, and a second
+  injected-click rejection was recorded on Desk.
+
+Screenshots of every key state were captured during the run. Evidence boundary: the first
+Desk pass's physical click landed after its cut and was labeled as such; the second pass
+captured the full trusted before/after pair.
+
+Known non-blocking gap found during the run: the Sale page contains no navigation link back
+to the picker or Desk (zero `href`s in its HTML) — a judge who enters Sale must use the
+browser back button or type the URL. Navigation-only; no WebMCP defect.
+
+Provenance note: the public repository advanced past the private clone on August 30–31 with
+three fixes (partial-registration cleanup, incomplete-restoration refusal, and
+stop-reverse-restoration-after-failure via public PR #3). The deployed public head is the
+product of record for this receipt. On September 1 the private clone's `src/`, `test/`,
+`index.html`, and `sale/index.html` were re-synced byte-for-byte from public `e031503`
+(`git diff --stat HEAD loadshed/main -- index.html sale/ src/ test/ README.md` is empty).
+
+## Post-merge live smoke — September 1, 2026 (public `e031503`)
+
+Public PR #5 merged as `e031503` with the receipt-honesty fixes from the September 1
+adversarial audit (post-restore click attribution, callback isolation, required ladder
+callbacks, previous-cut label, `restoreAll` caller check, strict `sinceIso`, honest toggle
+revert). Pages served the new runtime within minutes: `curl` of the live `src/loadshed.js`
+returned HTTP 200 and contained the new `openComparison` field six times.
+
+The README judge path was then walked on the live root in an automated browser that has no
+WebMCP surface (badge read **tools unavailable**), so this smoke covers the page half only:
+
+- Promise on at 20:12:04Z (page default). Crowd load set to 100%; automatic shed at
+  20:12:53Z cut Crowd 480 to 48 with a 320 ms last hitch and Live trace untouched.
+- A Tap after the cut produced one measurement receipt at 20:13:05Z pairing a before and
+  after click, both labeled `page-measured` because the automated clicks fell under Event
+  Timing's 16 ms floor.
+- Promise off at 20:13:19Z: restore (Crowd 48 to 480), contract-off, and override receipts
+  in order; the page read "Promise is off for contrast" and "Crowd at full fidelity".
+- Two further Taps after the restore added **no** new measurement receipt and did **not**
+  rewrite the 20:13:05Z receipt. The rail ended at six events. This is the defect the audit
+  rated highest, now absent on the deployed product.
+
+Evidence boundary: automated clicks are not physical clicks and this browser is not a
+rules-named client. The September 1 qualification receipt above remains the named-client
+evidence; its commit `74c13a8` predates the `e031503` fixes, so a final named-client pass
+against `e031503` is still the strongest available close-out step.
+
 ## Video plan (target 1:30)
 
 The final public YouTube video must be less than three minutes, include audio, show the project
@@ -192,7 +266,7 @@ The account is already registered for the challenge. The live submission form wa
 | `28254` Live URL | `https://mcs-eng.github.io/loadshed/` |
 | `28255` Testing instructions | Open the root in ChatGPT's in-app browser or Chrome 149+ with WebMCP enabled; confirm **tools ready**; inspect responsiveness and options; set a 100 ms `live-trace` contract; protect `mark-note`; move Crowd load to 100%; click Tap yourself; wait for Crowd 480 to 48; compare the visible rail with `get_intervention_receipts`; turn the promise off; repeat on Sale with `hold-size` and `hold-note`. No credentials are required. |
 | `28256` Public code repository | `https://github.com/mcs-eng/loadshed` |
-| `28257` Tested clients | Codex in-app browser: live six-tool Desk and Sale qualification. Edge 152: runtime and reduced-motion smoke, not a WebMCP-agent qualification. **Update after the final ChatGPT or Chrome 149+ run.** |
+| `28257` Tested clients | ChatGPT in-app browser (September 1, 2026): full six-tool Desk and Sale qualification with physical clicks against public `74c13a8`. Codex in-app browser (August 29): live six-tool Desk and Sale qualification. Edge 152: runtime and reduced-motion smoke, not a WebMCP-agent qualification. **If a named-client pass against `e031503` is run, name it here.** |
 | `28258` AI tools used | OpenAI Codex, including Sol, Terra, and Luna review passes; Anthropic Claude; xAI Grok; and Agy. |
 | `28259` Learning level | **OPERATOR:** choose None, Moderate, or Significant. |
 | `28260` Career AI value | **OPERATOR:** choose Yes or No. |
@@ -211,8 +285,17 @@ submission.
 - [x] Choose a static host and deploy the exact reviewed source commit.
 - [x] Complete a live hosted six-tool qualification and record its bounded receipt.
 - [x] Capture screenshots without credentials, private data, browser profiles, or unrelated tabs.
-- [ ] Repeat the qualification in ChatGPT's in-app browser or Chrome 149+ with a physical click.
+- [x] Repeat the qualification in ChatGPT's in-app browser or Chrome 149+ with a physical click.
+  (Done 2026-09-01 in ChatGPT's in-app browser against public commit `74c13a8`; see the
+  September 1 qualification receipt above.)
+- [x] Tag the judged commit: public `e031503` carries annotated tag `v0.1.0-submission`
+  (pushed 2026-09-01).
+- [x] Devpost draft text updated 2026-09-01: test count 49, both "320.157 ms" figures rounded
+  to "about 320 ms", and one paragraph naming `e031503` and the post-merge smoke.
+- [ ] Recommended, not required: repeat one named-client pass (ChatGPT in-app browser or
+  Chrome 149+) against public `e031503` and record it in the tested-clients row.
 - [ ] Record, edit, and publicly upload the narrated video; verify runtime is less than 3:00.
+  Use the private clone's `VIDEO-RECORDING-SHEET.md` at the mic (not part of the public export).
 - [ ] Replace the remaining YouTube placeholder with the public video URL.
 - [x] Publish and review the project description in the Devpost draft.
 - [ ] Submit before September 3, 2026 at 1:00 PM Pacific, then preserve the submitted artifacts
