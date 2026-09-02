@@ -258,3 +258,12 @@ test('sinceIso accepts only ISO 8601 instants and filters from the epoch correct
   assert.throws(() => seam.interventionReceipts({ sinceIso: '2026-13-45T99:99:99Z' }), { message: /ISO date string/ });
   runtime.stop();
 });
+
+test('receipt growth cannot stretch the protected Desk canvas', () => {
+  const indexSource = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  assert.match(
+    indexSource,
+    /\.stage \{[^}]*align-self:start;/,
+    'the Desk stage must opt out of grid-row stretching so receipt history cannot enlarge its animated canvases'
+  );
+});
