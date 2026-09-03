@@ -1084,6 +1084,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
       const screenReaderStatus = document.getElementById('screen-reader-status');
 
       let runState = 'ready';
+      let startAttempt = 0;
       let frameId = 0;
       let countdownTimer = 0;
       let saveTimer = 0;
@@ -1347,10 +1348,11 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
 
       function setState(nextState, announcement) {
         runState = nextState;
-        pauseButton.disabled = nextState === 'ready' || nextState === 'complete' || !spokenWords;
+        pauseButton.disabled = nextState === 'ready' || nextState === 'starting' || nextState === 'complete' || !spokenWords;
         pauseButton.textContent = nextState === 'paused' ? 'Resume' : 'Pause';
         const labels = {
           ready: 'Ready to rehearse',
+          starting: 'Preparing prompt',
           countdown: 'Stand by',
           running: 'Rolling',
           paused: 'Paused',
@@ -1438,21 +1440,25 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         }
       }
 
-      function startOneShot() {
+      async function startOneShot() {
         renderScript();
         if (!spokenWords) {
           scriptInput.focus();
           screenReaderStatus.textContent = 'Add spoken copy before starting.';
           return;
         }
+        const attempt = ++startAttempt;
         cancelMotion();
         promptScreen.scrollTop = 0;
         currentScrollTop = 0;
         elapsedMs = 0;
         body.classList.add('is-on-air');
+        setState('starting', 'Preparing the prompt.');
+        updatePromptInsets();
+        if (fullscreenToggle.checked) await requestPromptFullscreen();
+        if (attempt !== startAttempt || !body.classList.contains('is-on-air')) return;
         updatePromptInsets();
         refreshMotionMetrics();
-        if (fullscreenToggle.checked) void requestPromptFullscreen();
         beginCountdown(Number(countdownControl.value));
       }
 
@@ -1477,6 +1483,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
       }
 
       function restart() {
+        if (runState === 'starting') return;
         cancelMotion();
         promptScreen.scrollTop = 0;
         currentScrollTop = 0;
@@ -1488,6 +1495,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
       }
 
       async function exitToEditor() {
+        startAttempt += 1;
         cancelMotion();
         countdown.hidden = true;
         body.classList.remove('is-on-air');
@@ -1640,7 +1648,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         control.dispatchEvent(new Event('input', { bubbles: true }));
       }
 
-      startButton.addEventListener('click', startOneShot);
+      startButton.addEventListener('click', () => void startOneShot());
       pauseButton.addEventListener('click', togglePause);
       restartButton.addEventListener('click', restart);
       fullscreenButton.addEventListener('click', () => void toggleFullscreen());
@@ -1694,6 +1702,10 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
       document.addEventListener('keydown', (event) => {
         if (!body.classList.contains('is-on-air')) return;
         const key = event.key.toLowerCase();
+        if (runState === 'starting' && key !== 'e' && event.key !== 'Escape') {
+          event.preventDefault();
+          return;
+        }
         if (event.code === 'Space') {
           event.preventDefault();
           togglePause();
@@ -1748,7 +1760,9 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         refreshMotionMetrics();
       }));
       document.addEventListener('visibilitychange', () => {
-        if (document.hidden && (runState === 'running' || runState === 'countdown')) pause();
+        if (!document.hidden) return;
+        if (runState === 'starting') void exitToEditor();
+        else if (runState === 'running' || runState === 'countdown') pause();
       });
       window.addEventListener('beforeunload', () => {
         try {

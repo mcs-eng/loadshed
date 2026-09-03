@@ -53,6 +53,44 @@ test('reviewers get runnable judge and reusable teleprompter paths', () => {
   );
   assert.match(paceHandlerSource, /updatePaceMetrics\(/);
   assert.doesNotMatch(paceHandlerSource, /applySettings\(|scheduleMetricsRefresh\(|refreshMotionMetrics\(/);
+  const startSource = inlineScript.slice(
+    inlineScript.indexOf('async function startOneShot()'),
+    inlineScript.indexOf('function pause()')
+  );
+  assert.match(startSource, /async function startOneShot\(\)/);
+  const fullscreenAwait = startSource.indexOf('await requestPromptFullscreen()');
+  const finalMeasure = startSource.lastIndexOf('refreshMotionMetrics()');
+  const countdownStart = startSource.indexOf('beginCountdown(');
+  assert.ok(fullscreenAwait >= 0, 'automatic fullscreen must be awaited');
+  assert.ok(finalMeasure > fullscreenAwait, 'prompt geometry must be measured after fullscreen settles');
+  assert.ok(countdownStart > finalMeasure, 'countdown must start after final fullscreen geometry');
+  assert.match(startSource, /const attempt = \+\+startAttempt/);
+  assert.match(
+    startSource,
+    /if \(attempt !== startAttempt \|\| !body\.classList\.contains\('is-on-air'\)\) return;/,
+    'canceling during fullscreen startup must prevent the async continuation from starting a countdown'
+  );
+  assert.match(inlineScript, /starting: 'Preparing prompt'/);
+  assert.match(inlineScript, /nextState === 'starting'/);
+  assert.match(
+    inlineScript,
+    /if \(runState === 'starting' && key !== 'e' && event\.key !== 'Escape'\)/,
+    'on-air shortcuts must not compete with fullscreen startup'
+  );
+  const exitSource = inlineScript.slice(
+    inlineScript.indexOf('async function exitToEditor()'),
+    inlineScript.indexOf('async function toggleFullscreen()')
+  );
+  assert.match(exitSource, /startAttempt \+= 1/);
+  const visibilitySource = inlineScript.slice(
+    inlineScript.indexOf("document.addEventListener('visibilitychange'"),
+    inlineScript.indexOf("window.addEventListener('beforeunload'")
+  );
+  assert.match(
+    visibilitySource,
+    /if \(runState === 'starting'\) void exitToEditor\(\)/,
+    'hiding a pending fullscreen start must invalidate it before any countdown begins'
+  );
 });
 
 test('submission handoff records published artifacts without overstating operator-owned work', () => {
