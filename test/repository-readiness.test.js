@@ -41,6 +41,37 @@ test('reviewers get runnable judge and reusable teleprompter paths', () => {
   assert.match(inlineScript, /const READOUT_INTERVAL_MS = 250/);
   assert.match(inlineScript, /const MAX_HIGHLIGHT_WORDS = 5_000/);
   assert.match(inlineScript, /spokenWords <= MAX_HIGHLIGHT_WORDS/);
+  const cueClockStart = inlineScript.indexOf('function advanceWordProgress(');
+  assert.ok(cueClockStart >= 0, 'word highlighting must integrate the spoken-time clock');
+  const cueClockEnd = inlineScript.indexOf('function clearCurrentWord()', cueClockStart);
+  const cueClockSource = inlineScript.slice(cueClockStart, cueClockEnd);
+  const cueContext = {};
+  vm.runInNewContext(`${cueClockSource}\nlet progress = advanceWordProgress(0, 30_000, 120);
+  result = [
+    wordIndexAtProgress(0, 0),
+    wordIndexAtProgress(progress, 200),
+    wordIndexAtProgress(progress = advanceWordProgress(progress, 500, 240), 200),
+    progress,
+    wordIndexAtProgress(5_000, 4)
+  ];`, cueContext);
+  assert.equal(JSON.stringify(cueContext.result), JSON.stringify([-1, 60, 62, 62, 3]));
+  const rebuildCueSource = inlineScript.slice(
+    inlineScript.indexOf('function rebuildWordCues()'),
+    inlineScript.indexOf('function updateCurrentWord(')
+  );
+  assert.doesNotMatch(
+    rebuildCueSource,
+    /getBoundingClientRect|offset(?:Top|Height)/,
+    'word-cue setup must not depend on viewport geometry'
+  );
+  assert.match(
+    inlineScript,
+    /advanceWordProgress\(\s*spokenWordProgress,\s*delta,\s*Number\(speedControl\.value\)\s*\)/
+  );
+  assert.match(
+    inlineScript,
+    /wordIndexAtProgress\(spokenWordProgress, wordCues\.length\)/
+  );
   const tickSource = inlineScript.slice(
     inlineScript.indexOf('function tick(now)'),
     inlineScript.indexOf('function beginScrolling()')

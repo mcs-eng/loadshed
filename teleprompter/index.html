@@ -1041,7 +1041,6 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
 
       const STORAGE_KEY = 'tube-prompt:v1';
       const READOUT_INTERVAL_MS = 250;
-      const LINE_GROUP_TOLERANCE_PX = 3;
       const MAX_HIGHLIGHT_WORDS = 5_000;
       const SAMPLE_TITLE = 'LoadShed — 90 second demo';
       const SAMPLE_SCRIPT = document.getElementById('script-input').value;
@@ -1092,6 +1091,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
       let lastFrameTime = 0;
       let lastReadoutTime = 0;
       let elapsedMs = 0;
+      let spokenWordProgress = 0;
       let spokenWords = 0;
       let countdownRemaining = 0;
       let pausedDuringCountdown = false;
@@ -1099,7 +1099,6 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
       let motionDurationSeconds = 0;
       let motionPixelsPerSecond = 0;
       let currentScrollTop = 0;
-      let focusOffsetPx = 0;
       let wordCues = [];
       let currentWordIndex = -1;
       const readoutCache = {
@@ -1202,9 +1201,20 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         return spokenWords ? (spokenWords / Number(speedControl.value)) * 60 : 0;
       }
 
+      function advanceWordProgress(currentProgress, elapsedMilliseconds, wordsPerMinute) {
+        return Math.max(0, currentProgress)
+          + ((Math.max(0, elapsedMilliseconds) * Math.max(0, wordsPerMinute)) / 60_000);
+      }
+
+      function wordIndexAtProgress(wordProgress, wordCount) {
+        if (wordCount <= 0) return -1;
+        const spokenIndex = Math.floor(Math.max(0, wordProgress));
+        return Math.min(wordCount - 1, spokenIndex);
+      }
+
       function clearCurrentWord() {
         const current = wordCues[currentWordIndex];
-        if (current) current.element.classList.remove('is-current');
+        if (current) current.classList.remove('is-current');
         currentWordIndex = -1;
       }
 
@@ -1212,70 +1222,20 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         clearCurrentWord();
         wordCues = [];
         if (!highlightToggle.checked) return;
-        const words = Array.from(promptCopy.querySelectorAll('.prompt-word'));
-        if (!words.length) return;
-
-        const screenRect = promptScreen.getBoundingClientRect();
-        const lines = [];
-        for (const element of words) {
-          const rect = element.getBoundingClientRect();
-          const center = rect.top - screenRect.top + currentScrollTop + (rect.height / 2);
-          let line = lines[lines.length - 1];
-          if (!line || Math.abs(line.center - center) > LINE_GROUP_TOLERANCE_PX) {
-            line = { center, words: [] };
-            lines.push(line);
-          }
-          line.words.push(element);
-        }
-
-        const linePositions = lines.map((line) => Math.max(
-          0,
-          Math.min(motionDistance, line.center - focusOffsetPx)
-        ));
-
-        lines.forEach((line, lineIndex) => {
-          const start = lineIndex === 0
-            ? 0
-            : (linePositions[lineIndex - 1] + linePositions[lineIndex]) / 2;
-          const end = lineIndex === lines.length - 1
-            ? motionDistance
-            : (linePositions[lineIndex] + linePositions[lineIndex + 1]) / 2;
-          const wordSpan = Math.max(0, end - start) / line.words.length;
-          line.words.forEach((element, wordIndex) => {
-            wordCues.push({
-              element,
-              position: start + (wordSpan * (wordIndex + .5))
-            });
-          });
-        });
+        wordCues = Array.from(promptCopy.querySelectorAll('.prompt-word'));
       }
 
-      function updateCurrentWord(position = currentScrollTop) {
+      function updateCurrentWord() {
         if (!highlightToggle.checked || !wordCues.length) {
           clearCurrentWord();
           return;
         }
 
-        let low = 0;
-        let high = wordCues.length - 1;
-        while (low < high) {
-          const middle = Math.floor((low + high) / 2);
-          if (wordCues[middle].position < position) low = middle + 1;
-          else high = middle;
-        }
-
-        let nextIndex = low;
-        if (
-          nextIndex > 0
-          && Math.abs(wordCues[nextIndex - 1].position - position)
-            <= Math.abs(wordCues[nextIndex].position - position)
-        ) {
-          nextIndex -= 1;
-        }
+        const nextIndex = wordIndexAtProgress(spokenWordProgress, wordCues.length);
         if (nextIndex === currentWordIndex) return;
         clearCurrentWord();
         currentWordIndex = nextIndex;
-        wordCues[currentWordIndex].element.classList.add('is-current');
+        wordCues[currentWordIndex].classList.add('is-current');
       }
 
       function updateReadouts() {
@@ -1310,7 +1270,6 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         metricsFrameId = 0;
         motionDistance = Math.max(0, promptScreen.scrollHeight - promptScreen.clientHeight);
         currentScrollTop = Math.max(0, Math.min(motionDistance, promptScreen.scrollTop));
-        focusOffsetPx = promptScreen.clientHeight * (Number(focusControl.value) / 100);
         updatePaceMetrics();
         rebuildWordCues();
         updateCurrentWord();
@@ -1381,6 +1340,11 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         );
         promptScreen.scrollTop = currentScrollTop;
         elapsedMs += delta;
+        spokenWordProgress = advanceWordProgress(
+          spokenWordProgress,
+          delta,
+          Number(speedControl.value)
+        );
         updateCurrentWord();
         if (now - lastReadoutTime >= READOUT_INTERVAL_MS) {
           lastReadoutTime = now;
@@ -1452,6 +1416,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         promptScreen.scrollTop = 0;
         currentScrollTop = 0;
         elapsedMs = 0;
+        spokenWordProgress = 0;
         body.classList.add('is-on-air');
         setState('starting', 'Preparing the prompt.');
         updatePromptInsets();
@@ -1488,6 +1453,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         promptScreen.scrollTop = 0;
         currentScrollTop = 0;
         elapsedMs = 0;
+        spokenWordProgress = 0;
         updateCurrentWord();
         updateReadouts();
         if (body.classList.contains('is-on-air')) beginCountdown(Number(countdownControl.value));
@@ -1615,6 +1581,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
           promptScreen.scrollTop = 0;
           currentScrollTop = 0;
           elapsedMs = 0;
+          spokenWordProgress = 0;
           renderScript();
           saveLocalState();
           saveState.textContent = `Loaded ${file.name}.`;
@@ -1635,6 +1602,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         promptScreen.scrollTop = 0;
         currentScrollTop = 0;
         elapsedMs = 0;
+        spokenWordProgress = 0;
         renderScript();
         saveLocalState();
         saveState.textContent = 'Built-in LoadShed script restored.';
@@ -1667,6 +1635,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         promptScreen.scrollTop = 0;
         currentScrollTop = 0;
         elapsedMs = 0;
+        spokenWordProgress = 0;
         renderScript();
         setState('ready');
         saveLocalState();
