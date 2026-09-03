@@ -494,6 +494,19 @@
       white-space: pre-wrap;
     }
 
+    .prompt-word {
+      border-radius: .14em;
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+    }
+
+    .prompt-word.is-current {
+      color: #170f08;
+      background: var(--ink-bright);
+      text-shadow: none;
+      box-shadow: 0 0 .34em rgba(255, 197, 77, .42);
+    }
+
     .prompt-copy .cue {
       margin-bottom: 1.1em;
       color: #a57b3f;
@@ -962,6 +975,10 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
           </div>
 
           <div class="switches" aria-label="Prompt options">
+            <label class="switch" for="highlight-toggle">
+              <input id="highlight-toggle" type="checkbox" checked>
+              Highlight the reading word
+            </label>
             <label class="switch" for="mirror-toggle">
               <input id="mirror-toggle" type="checkbox">
               Mirror prompt text only
@@ -1011,7 +1028,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
           <progress class="progress-track" id="progress-readout" value="0" max="100" aria-label="Prompt progress">0%</progress>
         </section>
 
-        <p class="shortcut-card"><strong>On-air keys:</strong> <kbd>Space</kbd> pause/resume · <kbd>↑</kbd><kbd>↓</kbd> pace · <kbd>+</kbd><kbd>−</kbd> type · <kbd>M</kbd> mirror · <kbd>R</kbd> restart · <kbd>F</kbd> fullscreen · <kbd>E</kbd> or <kbd>Esc</kbd> return to editor. Double-click the glass to pause.</p>
+        <p class="shortcut-card"><strong>On-air keys:</strong> <kbd>Space</kbd> pause/resume · <kbd>↑</kbd><kbd>↓</kbd> pace · <kbd>+</kbd><kbd>−</kbd> type · <kbd>H</kbd> word cue · <kbd>M</kbd> mirror · <kbd>R</kbd> restart · <kbd>F</kbd> fullscreen · <kbd>E</kbd> or <kbd>Esc</kbd> return to editor. Double-click the glass to pause.</p>
       </div>
     </div>
   </main>
@@ -1023,6 +1040,9 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
       'use strict';
 
       const STORAGE_KEY = 'tube-prompt:v1';
+      const READOUT_INTERVAL_MS = 250;
+      const LINE_GROUP_TOLERANCE_PX = 3;
+      const MAX_HIGHLIGHT_WORDS = 5_000;
       const SAMPLE_TITLE = 'LoadShed — 90 second demo';
       const SAMPLE_SCRIPT = document.getElementById('script-input').value;
       const root = document.documentElement;
@@ -1039,6 +1059,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
       const widthControl = document.getElementById('width-control');
       const focusControl = document.getElementById('focus-control');
       const countdownControl = document.getElementById('countdown-control');
+      const highlightToggle = document.getElementById('highlight-toggle');
       const mirrorToggle = document.getElementById('mirror-toggle');
       const fullscreenToggle = document.getElementById('fullscreen-toggle');
       const startButton = document.getElementById('start-button');
@@ -1066,11 +1087,27 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
       let frameId = 0;
       let countdownTimer = 0;
       let saveTimer = 0;
+      let metricsFrameId = 0;
       let lastFrameTime = 0;
+      let lastReadoutTime = 0;
       let elapsedMs = 0;
       let spokenWords = 0;
       let countdownRemaining = 0;
       let pausedDuringCountdown = false;
+      let motionDistance = 0;
+      let motionDurationSeconds = 0;
+      let motionPixelsPerSecond = 0;
+      let currentScrollTop = 0;
+      let focusOffsetPx = 0;
+      let wordCues = [];
+      let currentWordIndex = -1;
+      const readoutCache = {
+        duration: '',
+        elapsed: '',
+        remaining: '',
+        progressValue: -1,
+        progressText: ''
+      };
 
       function isCue(block) {
         const value = block.trim();
@@ -1105,10 +1142,27 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         return spoken ? spoken.split(/\s+/u).length : 0;
       }
 
+      function appendSpokenWords(paragraph, block) {
+        for (const token of block.split(/(\s+)/u)) {
+          if (!token) continue;
+          if (/^\s+$/u.test(token)) {
+            paragraph.appendChild(document.createTextNode(token));
+          } else {
+            const word = document.createElement('span');
+            word.className = 'prompt-word';
+            word.textContent = token;
+            paragraph.appendChild(word);
+          }
+        }
+      }
+
       function renderScript() {
         const blocks = parseBlocks(scriptInput.value);
         const fragment = document.createDocumentFragment();
         spokenWords = countWords(scriptInput.value);
+        const canHighlightWords = spokenWords <= MAX_HIGHLIGHT_WORDS;
+        currentWordIndex = -1;
+        wordCues = [];
 
         if (!blocks.length) {
           const empty = document.createElement('p');
@@ -1118,15 +1172,22 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         } else {
           for (const block of blocks) {
             const paragraph = document.createElement('p');
-            paragraph.textContent = block;
-            if (isCue(block)) paragraph.className = 'cue';
+            if (isCue(block)) {
+              paragraph.className = 'cue';
+              paragraph.textContent = block;
+            } else if (canHighlightWords) {
+              appendSpokenWords(paragraph, block);
+            } else {
+              paragraph.textContent = block;
+            }
             fragment.appendChild(paragraph);
           }
         }
 
         promptCopy.replaceChildren(fragment);
-        wordOutput.textContent = `${spokenWords} spoken ${spokenWords === 1 ? 'word' : 'words'}`;
-        updateReadouts();
+        const cueLimit = !canHighlightWords ? ' · word cue off above 5,000' : '';
+        wordOutput.textContent = `${spokenWords} spoken ${spokenWords === 1 ? 'word' : 'words'}${cueLimit}`;
+        scheduleMetricsRefresh();
       }
 
       function formatTime(totalSeconds) {
@@ -1140,26 +1201,127 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         return spokenWords ? (spokenWords / Number(speedControl.value)) * 60 : 0;
       }
 
-      function scrollDistance() {
-        return Math.max(0, promptScreen.scrollHeight - promptScreen.clientHeight);
+      function clearCurrentWord() {
+        const current = wordCues[currentWordIndex];
+        if (current) current.element.classList.remove('is-current');
+        currentWordIndex = -1;
       }
 
-      function pixelsPerSecond() {
-        const duration = totalDurationSeconds();
-        return duration > 0 ? scrollDistance() / duration : 0;
+      function rebuildWordCues() {
+        clearCurrentWord();
+        wordCues = [];
+        if (!highlightToggle.checked) return;
+        const words = Array.from(promptCopy.querySelectorAll('.prompt-word'));
+        if (!words.length) return;
+
+        const screenRect = promptScreen.getBoundingClientRect();
+        const lines = [];
+        for (const element of words) {
+          const rect = element.getBoundingClientRect();
+          const center = rect.top - screenRect.top + currentScrollTop + (rect.height / 2);
+          let line = lines[lines.length - 1];
+          if (!line || Math.abs(line.center - center) > LINE_GROUP_TOLERANCE_PX) {
+            line = { center, words: [] };
+            lines.push(line);
+          }
+          line.words.push(element);
+        }
+
+        const linePositions = lines.map((line) => Math.max(
+          0,
+          Math.min(motionDistance, line.center - focusOffsetPx)
+        ));
+
+        lines.forEach((line, lineIndex) => {
+          const start = lineIndex === 0
+            ? 0
+            : (linePositions[lineIndex - 1] + linePositions[lineIndex]) / 2;
+          const end = lineIndex === lines.length - 1
+            ? motionDistance
+            : (linePositions[lineIndex] + linePositions[lineIndex + 1]) / 2;
+          const wordSpan = Math.max(0, end - start) / line.words.length;
+          line.words.forEach((element, wordIndex) => {
+            wordCues.push({
+              element,
+              position: start + (wordSpan * (wordIndex + .5))
+            });
+          });
+        });
+      }
+
+      function updateCurrentWord(position = currentScrollTop) {
+        if (!highlightToggle.checked || !wordCues.length) {
+          clearCurrentWord();
+          return;
+        }
+
+        let low = 0;
+        let high = wordCues.length - 1;
+        while (low < high) {
+          const middle = Math.floor((low + high) / 2);
+          if (wordCues[middle].position < position) low = middle + 1;
+          else high = middle;
+        }
+
+        let nextIndex = low;
+        if (
+          nextIndex > 0
+          && Math.abs(wordCues[nextIndex - 1].position - position)
+            <= Math.abs(wordCues[nextIndex].position - position)
+        ) {
+          nextIndex -= 1;
+        }
+        if (nextIndex === currentWordIndex) return;
+        clearCurrentWord();
+        currentWordIndex = nextIndex;
+        wordCues[currentWordIndex].element.classList.add('is-current');
       }
 
       function updateReadouts() {
-        const distance = scrollDistance();
-        const progress = distance > 0 ? Math.min(1, promptScreen.scrollTop / distance) : 0;
-        const speed = pixelsPerSecond();
-        const remaining = speed > 0 ? Math.max(0, distance - promptScreen.scrollTop) / speed : 0;
+        const progress = motionDistance > 0 ? Math.min(1, currentScrollTop / motionDistance) : 0;
+        const remaining = motionPixelsPerSecond > 0
+          ? Math.max(0, motionDistance - currentScrollTop) / motionPixelsPerSecond
+          : 0;
+        const values = {
+          duration: formatTime(motionDurationSeconds),
+          elapsed: formatTime(elapsedMs / 1000),
+          remaining: formatTime(remaining),
+          progressValue: Math.round(progress * 1000) / 10,
+          progressText: `${Math.round(progress * 100)}%`
+        };
 
-        durationReadout.textContent = formatTime(totalDurationSeconds());
-        elapsedReadout.textContent = formatTime(elapsedMs / 1000);
-        remainingReadout.textContent = formatTime(remaining);
-        progressReadout.value = Math.round(progress * 1000) / 10;
-        progressReadout.textContent = `${Math.round(progress * 100)}%`;
+        if (values.duration !== readoutCache.duration) durationReadout.textContent = values.duration;
+        if (values.elapsed !== readoutCache.elapsed) elapsedReadout.textContent = values.elapsed;
+        if (values.remaining !== readoutCache.remaining) remainingReadout.textContent = values.remaining;
+        if (values.progressValue !== readoutCache.progressValue) progressReadout.value = values.progressValue;
+        if (values.progressText !== readoutCache.progressText) progressReadout.textContent = values.progressText;
+        Object.assign(readoutCache, values);
+      }
+
+      function updatePaceMetrics() {
+        motionDurationSeconds = totalDurationSeconds();
+        motionPixelsPerSecond = motionDurationSeconds > 0 ? motionDistance / motionDurationSeconds : 0;
+        updateReadouts();
+      }
+
+      function refreshMotionMetrics() {
+        if (metricsFrameId) cancelAnimationFrame(metricsFrameId);
+        metricsFrameId = 0;
+        motionDistance = Math.max(0, promptScreen.scrollHeight - promptScreen.clientHeight);
+        currentScrollTop = Math.max(0, Math.min(motionDistance, promptScreen.scrollTop));
+        focusOffsetPx = promptScreen.clientHeight * (Number(focusControl.value) / 100);
+        updatePaceMetrics();
+        rebuildWordCues();
+        updateCurrentWord();
+      }
+
+      function scheduleMetricsRefresh() {
+        if (metricsFrameId) cancelAnimationFrame(metricsFrameId);
+        metricsFrameId = requestAnimationFrame(() => {
+          metricsFrameId = 0;
+          updatePromptInsets();
+          refreshMotionMetrics();
+        });
       }
 
       function updatePromptInsets() {
@@ -1180,10 +1342,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         leadingOutput.textContent = Number(leadingControl.value).toFixed(2);
         widthOutput.textContent = `${widthControl.value} ch`;
         focusOutput.textContent = `${focusControl.value}%`;
-        requestAnimationFrame(() => {
-          updatePromptInsets();
-          updateReadouts();
-        });
+        scheduleMetricsRefresh();
       }
 
       function setState(nextState, announcement) {
@@ -1212,15 +1371,24 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
       function tick(now) {
         if (runState !== 'running') return;
         if (!lastFrameTime) lastFrameTime = now;
-        const delta = Math.min(100, now - lastFrameTime);
+        const delta = Math.max(0, now - lastFrameTime);
         lastFrameTime = now;
-        const distance = scrollDistance();
-        const nextPosition = Math.min(distance, promptScreen.scrollTop + (pixelsPerSecond() * delta / 1000));
-        promptScreen.scrollTop = nextPosition;
+        currentScrollTop = Math.min(
+          motionDistance,
+          currentScrollTop + (motionPixelsPerSecond * delta / 1000)
+        );
+        promptScreen.scrollTop = currentScrollTop;
         elapsedMs += delta;
-        updateReadouts();
+        updateCurrentWord();
+        if (now - lastReadoutTime >= READOUT_INTERVAL_MS) {
+          lastReadoutTime = now;
+          updateReadouts();
+        }
 
-        if (distance === 0 || nextPosition >= distance - .5) {
+        if (motionDistance === 0 || currentScrollTop >= motionDistance - .5) {
+          currentScrollTop = motionDistance;
+          updateCurrentWord();
+          updateReadouts();
           setState('complete', 'End of script. Press Escape or E to return to the editor.');
           frameId = 0;
           return;
@@ -1234,6 +1402,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         pausedDuringCountdown = false;
         setState('running', 'Prompt rolling. Press Space to pause.');
         lastFrameTime = 0;
+        lastReadoutTime = 0;
         frameId = requestAnimationFrame(tick);
       }
 
@@ -1278,9 +1447,11 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         }
         cancelMotion();
         promptScreen.scrollTop = 0;
+        currentScrollTop = 0;
         elapsedMs = 0;
         body.classList.add('is-on-air');
         updatePromptInsets();
+        refreshMotionMetrics();
         if (fullscreenToggle.checked) void requestPromptFullscreen();
         beginCountdown(Number(countdownControl.value));
       }
@@ -1308,7 +1479,9 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
       function restart() {
         cancelMotion();
         promptScreen.scrollTop = 0;
+        currentScrollTop = 0;
         elapsedMs = 0;
+        updateCurrentWord();
         updateReadouts();
         if (body.classList.contains('is-on-air')) beginCountdown(Number(countdownControl.value));
         else setState('ready', 'Prompt returned to the beginning.');
@@ -1356,6 +1529,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
           width: widthControl.value,
           focus: focusControl.value,
           countdown: countdownControl.value,
+          highlight: highlightToggle.checked,
           mirror: mirrorToggle.checked,
           fullscreen: fullscreenToggle.checked
         };
@@ -1394,6 +1568,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
             }
           }
           if (['0', '3', '5'].includes(String(saved.countdown))) countdownControl.value = String(saved.countdown);
+          if (typeof saved.highlight === 'boolean') highlightToggle.checked = saved.highlight;
           if (typeof saved.mirror === 'boolean') mirrorToggle.checked = saved.mirror;
           if (typeof saved.fullscreen === 'boolean') fullscreenToggle.checked = saved.fullscreen;
           saveState.textContent = 'Restored your local draft.';
@@ -1430,6 +1605,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
           scriptInput.value = typeof reader.result === 'string' ? reader.result : '';
           scriptTitle.value = file.name.replace(/\.(txt|md)$/i, '') || 'Imported script';
           promptScreen.scrollTop = 0;
+          currentScrollTop = 0;
           elapsedMs = 0;
           renderScript();
           saveLocalState();
@@ -1449,6 +1625,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         scriptTitle.value = SAMPLE_TITLE;
         scriptInput.value = SAMPLE_SCRIPT;
         promptScreen.scrollTop = 0;
+        currentScrollTop = 0;
         elapsedMs = 0;
         renderScript();
         saveLocalState();
@@ -1460,8 +1637,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         const next = Math.min(Number(control.max), Math.max(Number(control.min), before + amount));
         if (next === before) return;
         control.value = String(next);
-        applySettings();
-        saveLocalState();
+        control.dispatchEvent(new Event('input', { bubbles: true }));
       }
 
       startButton.addEventListener('click', startOneShot);
@@ -1472,9 +1648,16 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
       downloadButton.addEventListener('click', downloadScript);
       fileInput.addEventListener('change', () => loadFile(fileInput.files[0]));
       promptScreen.addEventListener('dblclick', togglePause);
+      promptScreen.addEventListener('scroll', () => {
+        if (runState === 'running') return;
+        currentScrollTop = promptScreen.scrollTop;
+        updateCurrentWord();
+        updateReadouts();
+      });
 
       scriptInput.addEventListener('input', () => {
         promptScreen.scrollTop = 0;
+        currentScrollTop = 0;
         elapsedMs = 0;
         renderScript();
         setState('ready');
@@ -1482,18 +1665,31 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
       });
       scriptTitle.addEventListener('input', saveLocalState);
 
-      for (const control of [speedControl, sizeControl, leadingControl, widthControl, focusControl]) {
+      speedControl.addEventListener('input', () => {
+        speedOutput.textContent = `${speedControl.value} words/min`;
+        updatePaceMetrics();
+        saveLocalState();
+      });
+      for (const control of [sizeControl, leadingControl, widthControl, focusControl]) {
         control.addEventListener('input', () => {
           applySettings();
           saveLocalState();
         });
       }
-      for (const control of [countdownControl, mirrorToggle, fullscreenToggle]) {
-        control.addEventListener('change', () => {
-          applySettings();
-          saveLocalState();
-        });
-      }
+      countdownControl.addEventListener('change', saveLocalState);
+      fullscreenToggle.addEventListener('change', saveLocalState);
+      highlightToggle.addEventListener('change', () => {
+        if (highlightToggle.checked) scheduleMetricsRefresh();
+        else {
+          clearCurrentWord();
+          wordCues = [];
+        }
+        saveLocalState();
+      });
+      mirrorToggle.addEventListener('change', () => {
+        promptCopy.classList.toggle('is-mirrored', mirrorToggle.checked);
+        saveLocalState();
+      });
 
       document.addEventListener('keydown', (event) => {
         if (!body.classList.contains('is-on-air')) return;
@@ -1513,10 +1709,19 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
         } else if (event.key === '-' || event.key === '_') {
           event.preventDefault();
           nudgeRange(sizeControl, -Number(sizeControl.step));
+        } else if (key === 'h') {
+          event.preventDefault();
+          highlightToggle.checked = !highlightToggle.checked;
+          if (highlightToggle.checked) scheduleMetricsRefresh();
+          else {
+            clearCurrentWord();
+            wordCues = [];
+          }
+          saveLocalState();
         } else if (key === 'm') {
           event.preventDefault();
           mirrorToggle.checked = !mirrorToggle.checked;
-          applySettings();
+          promptCopy.classList.toggle('is-mirrored', mirrorToggle.checked);
           saveLocalState();
         } else if (key === 'r') {
           event.preventDefault();
@@ -1532,7 +1737,7 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
 
       document.addEventListener('fullscreenchange', () => {
         updatePromptInsets();
-        updateReadouts();
+        refreshMotionMetrics();
         if (!document.fullscreenElement && body.classList.contains('is-on-air')) {
           void exitToEditor();
         }
@@ -1540,8 +1745,11 @@ Turn the promise off, and full fidelity returns. Sale uses the same six tools wi
 
       window.addEventListener('resize', () => requestAnimationFrame(() => {
         updatePromptInsets();
-        updateReadouts();
+        refreshMotionMetrics();
       }));
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && (runState === 'running' || runState === 'countdown')) pause();
+      });
       window.addEventListener('beforeunload', () => {
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeState()));

@@ -27,6 +27,7 @@ test('reviewers get runnable judge and reusable teleprompter paths', () => {
   assert.match(prompter, /id="speed-control"[^>]+type="range"/);
   assert.match(prompter, /id="size-control"[^>]+type="range"/);
   assert.match(prompter, /id="mirror-toggle"[^>]+type="checkbox"/);
+  assert.match(prompter, /id="highlight-toggle"[^>]+type="checkbox"/);
   assert.match(prompter, /requestFullscreen/);
   assert.match(prompter, /localStorage/);
   assert.match(prompter, /prefers-reduced-motion/);
@@ -35,6 +36,23 @@ test('reviewers get runnable judge and reusable teleprompter paths', () => {
   const inlineScript = prompter.match(/<script>([\s\S]+)<\/script>/)?.[1];
   assert.ok(inlineScript, 'teleprompter must contain its executable behavior inline');
   assert.doesNotThrow(() => new vm.Script(inlineScript), 'teleprompter inline script must parse');
+  assert.match(inlineScript, /className = 'prompt-word'/);
+  assert.match(inlineScript, /function updateCurrentWord\(/);
+  assert.match(inlineScript, /const READOUT_INTERVAL_MS = 250/);
+  assert.match(inlineScript, /const MAX_HIGHLIGHT_WORDS = 5_000/);
+  assert.match(inlineScript, /spokenWords <= MAX_HIGHLIGHT_WORDS/);
+  const tickSource = inlineScript.slice(
+    inlineScript.indexOf('function tick(now)'),
+    inlineScript.indexOf('function beginScrolling()')
+  );
+  assert.doesNotMatch(tickSource, /scrollDistance\(|pixelsPerSecond\(/);
+  assert.doesNotMatch(tickSource, /Math\.min\(100,/);
+  const paceHandlerSource = inlineScript.slice(
+    inlineScript.indexOf("speedControl.addEventListener('input'"),
+    inlineScript.indexOf('for (const control of [sizeControl')
+  );
+  assert.match(paceHandlerSource, /updatePaceMetrics\(/);
+  assert.doesNotMatch(paceHandlerSource, /applySettings\(|scheduleMetricsRefresh\(|refreshMotionMetrics\(/);
 });
 
 test('submission handoff records published artifacts without overstating operator-owned work', () => {
