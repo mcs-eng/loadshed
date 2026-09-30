@@ -77,7 +77,7 @@ Cuts are bounded, ordered, reversible, and visible. On the deployed Desk, measur
 An agent can set a 100 ms promise for a named element and protect a second target, then read structured receipts that agree with what the person sees. The person supplies the physical click that makes latency evidence trustworthy; the runtime rejects agent-injected clicks and says so. Neither side could do this alone: the agent cannot produce trusted interaction evidence, and the person cannot read frame timing.
 
 **Briefly explain how you implemented WebMCP.**
-`src/loadshed.js` is one reusable runtime. It registers `inspect_responsiveness`, `get_adaptation_options`, `set_smoothness_contract`, `protect_experience_element`, `apply_adaptation`, and `get_intervention_receipts`, observes `long-animation-frame` and interaction timing, applies only page-registered callbacks in declared order, and fails closed when the browser cannot support an honest promise. The Desk and Sale pages prove the same engine protecting different page-owned outcomes with no knowledge of each other's DOM. Fifty Node tests cover the reusable runtime and both demos; the tagged deployed product is `8b4ea73`.
+`src/loadshed.js` is one reusable runtime. It registers `inspect_responsiveness`, `get_adaptation_options`, `set_smoothness_contract`, `protect_experience_element`, `apply_adaptation`, and `get_intervention_receipts`, observes `long-animation-frame` and interaction timing, applies only page-registered callbacks in declared order, and fails closed when the browser cannot support an honest promise. The Desk and Sale pages prove the same engine protecting different page-owned outcomes with no knowledge of each other's DOM. Fifty Node tests cover the reusable runtime and both demos; the tagged deployed product is `8e72e5f`.
 
 ## Current Devpost story (published 2026-09-02)
 
@@ -105,9 +105,9 @@ Submissions close Thursday, September 3, 2026 at 1:00 PM Pacific, 4:00 PM Easter
 
 1. Record the video from the private clone's video kit (not part of the public export): eight short clips in ChatGPT's in-app browser on the live site, pasted prompts, no live typing, waits trimmed in the edit, captions for the tool names, the working result in the first seconds. Confirm the runtime is under 3:00 and the audio names WebMCP and what was built.
 2. Upload it to YouTube as public. Open the link in a private window to confirm it plays without sign-in.
-3. The video clips are shot in ChatGPT's in-app browser against public `8b4ea73`, so they double as a tools-ready smoke of the deployed head. Only the ten-step hosted qualification above earns an entry in the tested-clients row; if the shoot runs those ten steps, record them there as "ChatGPT in-app browser (September 2, 2026) against public `8b4ea73`".
+3. The video clips are shot in ChatGPT's in-app browser against public `8e72e5f`, so they double as a tools-ready smoke of the deployed head. Only the ten-step hosted qualification above earns an entry in the tested-clients row; if the shoot runs those ten steps, record them there as "ChatGPT in-app browser (September 2, 2026) against public `8e72e5f`".
 4. On the Devpost form, save fields `28254` (live URL), `28255` (testing instructions), and `28256` (public repository) from the final-form map below; they were still blank on September 2. Re-read the already populated tested-client and AI-tool fields, verify the four operator-choice fields `28249`, `28250`, `28259`, and `28260`, and confirm the team roster matches `28249`. Replace the YouTube placeholder with the real URL.
-5. Confirm the public repository still shows the MIT license, the four topics (`webmcp`, `hackathon`, `web-performance`, `agents`), and annotated tag `v0.1.0-submission` at `8b4ea73`. All three were correct on September 2.
+5. Confirm the public repository still shows the MIT license, the four topics (`webmcp`, `hackathon`, `web-performance`, `agents`), and annotated tag `v0.1.0-submission` at `8e72e5f`. All three were correct on September 2.
 6. Read the whole form once as a judge would. Then submit before 4:00 PM Eastern, not at it.
 7. Keep the confirmation page as a PDF outside this public repository and note the submission time in the private clone.
 
@@ -242,7 +242,7 @@ WebMCP surface (badge read **tools unavailable**), so this smoke covers the page
 
 Evidence boundary: automated clicks are not physical clicks and this browser is not a
 rules-named client. The September 1 qualification receipt above remains the named-client
-human-click evidence. During the video shoot, repeat that click against tagged product `8b4ea73`
+human-click evidence. During the video shoot, repeat that click against tagged product `8e72e5f`
 so the recording also becomes the freshest named-client proof.
 
 ## Video plan (target 1:30)
@@ -326,7 +326,7 @@ September 2, 2026; these IDs and answers are a handoff, not a submitted entry.
 | `28254` Live URL | **BLANK ON DEVPOST:** `https://mcs-eng.github.io/loadshed/` |
 | `28255` Testing instructions | **BLANK ON DEVPOST:** Open the root in ChatGPT's in-app browser or Chrome 149+ with WebMCP enabled; confirm **tools ready**; inspect responsiveness and options; set a 100 ms `live-trace` contract; protect `mark-note`; move Crowd load to 100%; click Tap yourself; wait for Crowd 480 to 48; compare the visible rail with `get_intervention_receipts`; turn the promise off; repeat on Sale with `hold-size` and `hold-note`. No credentials are required. |
 | `28256` Public code repository | **BLANK ON DEVPOST:** `https://github.com/mcs-eng/loadshed` |
-| `28257` Tested clients | **POPULATED:** ChatGPT in-app browser (September 1, 2026): full six-tool Desk and Sale qualification with physical clicks against public `74c13a8`. Codex in-app browser (September 2): fresh six-tool Desk and Sale smoke against byte-exact tagged product `8b4ea73`; no human-click claim. Edge 152: runtime and reduced-motion smoke, not a WebMCP-agent qualification. **If the video shoot runs the ten hosted steps in ChatGPT's in-app browser against public `8b4ea73`, name it here.** |
+| `28257` Tested clients | **POPULATED:** ChatGPT in-app browser (September 1, 2026): full six-tool Desk and Sale qualification with physical clicks against public `74c13a8`. Codex in-app browser (September 2): fresh six-tool Desk and Sale smoke against byte-exact tagged product `8b4ea73`; no human-click claim. Edge 152: runtime and reduced-motion smoke, not a WebMCP-agent qualification. **If the video shoot runs the ten hosted steps in ChatGPT's in-app browser against public `8e72e5f`, name it here.** |
 | `28258` AI tools used | OpenAI Codex, including Sol, Terra, and Luna review passes; Anthropic Claude; xAI Grok; and Agy. |
 | `28259` Learning level | **OPERATOR:** choose None, Moderate, or Significant. |
 | `28260` Career AI value | **OPERATOR:** choose Yes or No. |
@@ -348,17 +348,18 @@ submission.
 - [x] Repeat the qualification in ChatGPT's in-app browser or Chrome 149+ with a physical click.
   (Done 2026-09-01 in ChatGPT's in-app browser against public commit `74c13a8`; see the
   September 1 qualification receipt above.)
-- [x] Tag the judged product: annotated tag `v0.1.0-submission` resolves to public `8b4ea73`
-  (verified 2026-09-02).
+- [x] Tag the judged product: annotated tag `v0.1.0-submission` resolves to public `8e72e5f`
+  (verified 2026-09-30).
 - [x] 2026-09-02: public `main` advanced to docs-only merge `fcd372d`; its runtime and demos remain
   the tagged `8b4ea73` product. 50/50 tests pass, and the live root, Sale page, and runtime match
   the tag byte-for-byte.
 - [x] Publish and re-read the concise Devpost story and tagline with the current 50-test claim.
-- [ ] Merge the final-polish correction, move `v0.1.0-submission` to that deployed head, and repeat
-  the live byte comparison plus Sale marker-off smoke before final submission.
+- [x] Merge the final-polish correction and move `v0.1.0-submission` to that deployed head (tag
+  resolves to `8e72e5f`, the commit GitHub Pages last built; verified 2026-09-30).
+- [ ] Repeat the live byte comparison plus Sale marker-off smoke before final submission.
 - [ ] Save required Devpost fields `28254`, `28255`, and `28256`, then re-read the rendered values.
 - [ ] Recommended, not required: repeat one named-client pass (ChatGPT in-app browser or
-  Chrome 149+) against public `8b4ea73` and record it in the tested-clients row. The video
+  Chrome 149+) against public `8e72e5f` and record it in the tested-clients row. The video
   shoot is the natural moment.
 - [ ] Record, edit, and publicly upload the narrated video; verify runtime is less than 3:00.
   Use the private clone's video kit at the mic (not part of the public export).
