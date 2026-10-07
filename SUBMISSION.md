@@ -1,9 +1,44 @@
-# WebMCP Challenge submission handoff
+# WebMCP Challenge submission close-out
 
-This file tracks repository evidence, published artifacts, and close-out work that still requires
-a supported WebMCP browser, video upload, or final submission authority.
+This file records the public submission state and preserves the dated qualification evidence and
+pre-submit handoff. The September draft statuses, form map, video plan, and checklists below are
+historical; they are not outstanding submission instructions.
 
-## Current submission state
+## Current submission state — verified October 7, 2026
+
+- Devpost entry — **SUBMITTED — <https://devpost.com/software/loadshed>.** The public page lists
+  Loadshed under “Submitted to” The WebMCP Challenge. Its
+  [public submission history](https://devpost.com/software/loadshed/submission_history) records
+  submission `1153761` for that challenge and the same video as the current project embed.
+- YouTube video — **PUBLISHED — <https://www.youtube.com/watch?v=YkLgb4AQtDg>.** YouTube identifies
+  it as “Loadshed — WebMCP Responsiveness Contracts,” published September 3, 2026, with a duration
+  of 86 seconds (1:26). Anonymous player metadata reports it public and playable in an embed.
+  This close-out checked the link and metadata, not playback or audio content.
+- Challenge — **ENDED; WINNERS ANNOUNCED.** The [challenge homepage](https://webmcp.devpost.com/)
+  reports that it has ended, and the official
+  [Meet the winners announcement](https://webmcp.devpost.com/updates/46049-meet-the-winners)
+  confirms judging is complete. This records the event's status, not an award result for Loadshed.
+- Live URL — **AVAILABLE — <https://mcs-eng.github.io/loadshed/>.** Anonymous HTTP checks returned
+  200 for Desk, Sale, the picker, both runtime scripts, and the proof image. Their contents match
+  public `main` at `8768c17` (text compared with LF line endings), whose product files are unchanged
+  from submission release `8e72e5f`. This availability/content check is not a new WebMCP qualification.
+- Public repository — **PUBLIC — <https://github.com/mcs-eng/loadshed>.** GitHub identifies the MIT
+  license. The remote annotated tag
+  [`v0.1.0-submission`](https://github.com/mcs-eng/loadshed/tree/v0.1.0-submission) resolves to
+  `8e72e5fb780e1612c6490a5d284c68bf89f25697`; no release tag was moved for this close-out.
+
+Verification used the public Devpost page and submission-history response, YouTube oEmbed/player
+metadata, the official challenge pages, GitHub repository/tag/Pages metadata, and live artifact
+content comparisons. Public submission and the linked video are confirmed; the exact submission
+timestamp and final private form answers were not exposed by those reads. The historical blank
+fields below must not be read as the current entry's state. The dated receipts retain their original
+commits, clients, measurements, and evidence gaps; no later browser run or rule-compliance result is
+inferred from publication.
+
+## Historical pre-submit status — September 2, 2026
+
+Superseded by the October 7 verification above. The following is the earlier handoff snapshot;
+“current,” “PENDING,” “PUBLIC DRAFT,” and incomplete fields refer only to that snapshot.
 
 - Source tree and local tests — **READY — 50/50 Node tests pass on current public `main`
   (`fcd372d`, run 2026-09-02).** That commit changes only this handoff from the tagged product;
@@ -24,6 +59,8 @@ a supported WebMCP browser, video upload, or final submission authority.
   required custom live-URL, testing-instructions, and repository fields are still blank; the video
   and final submission are also incomplete. Devpost reports **DRAFT, 1/5 steps done**.
 
+## Release-export boundary
+
 Do not publish this private repository's Git history. Raw local agent transcripts were removed from
 the current tree, but older private commits still contain them. The public repository was created
 from the product-only export. Use the same exporter for future release staging:
@@ -37,7 +74,9 @@ an explicit allowlist of product source, tests, license, and judge documentation
 orchestration and development artifacts are excluded. Sync only that staged output into the public
 release, rerun its tests, and verify the release hashes before pushing.
 
-## Draft project description
+## Historical draft project description
+
+Retained as pre-submit source material, not a transcription of the final submitted entry.
 
 When a live control room or shopping flow gets slow, the page knows which human task must survive;
 an agent looking at the DOM does not. Loadshed lets the page publish that priority as a contract: the
@@ -79,9 +118,9 @@ An agent can set a 100 ms promise for a named element and protect a second targe
 **Briefly explain how you implemented WebMCP.**
 `src/loadshed.js` is one reusable runtime. It registers `inspect_responsiveness`, `get_adaptation_options`, `set_smoothness_contract`, `protect_experience_element`, `apply_adaptation`, and `get_intervention_receipts`, observes `long-animation-frame` and interaction timing, applies only page-registered callbacks in declared order, and fails closed when the browser cannot support an honest promise. The Desk and Sale pages prove the same engine protecting different page-owned outcomes with no knowledge of each other's DOM. Fifty Node tests cover the reusable runtime and both demos; the tagged deployed product is `8e72e5f`.
 
-## Current Devpost story (published 2026-09-02)
+## Historical Devpost story (published 2026-09-02)
 
-This is the public one-minute story. The four evidence paragraphs above are supporting material, not
+This is the story recorded as published on September 2. The four evidence paragraphs above are supporting material, not
 separate form fields.
 
 **When a page gets slow, who decides what survives?**
@@ -99,9 +138,12 @@ The honest part: the runtime rejects agent-injected clicks as evidence, refuses 
 
 No build, no backend, MIT licensed, 50 Node tests. The live site, the repository, and the dated qualification receipts are linked below.
 
-## Thursday pre-submit checklist
+## Historical Thursday pre-submit checklist (retired)
 
-Submissions close Thursday, September 3, 2026 at 1:00 PM Pacific, 4:00 PM Eastern. Do these in order on Wednesday evening and Thursday morning.
+This September 2026 plan is preserved for provenance. Its deadline and instructions are historical;
+publication and submission are verified above. It is not a request to resubmit or change the release.
+
+The plan used Thursday, September 3, 2026 at 1:00 PM Pacific, 4:00 PM Eastern as its deadline and called for the following Wednesday-evening/Thursday-morning steps. This preserves the planned cutoff, not a fresh verification of the final official deadline.
 
 1. Record the video from the private clone's video kit (not part of the public export): eight short clips in ChatGPT's in-app browser on the live site, pasted prompts, no live typing, waits trimmed in the edit, captions for the tool names, the working result in the first seconds. Confirm the runtime is under 3:00 and the audio names WebMCP and what was built.
 2. Upload it to YouTube as public. Open the link in a private window to confirm it plays without sign-in.
@@ -112,6 +154,10 @@ Submissions close Thursday, September 3, 2026 at 1:00 PM Pacific, 4:00 PM Easter
 7. Keep the confirmation page as a PDF outside this public repository and note the submission time in the private clone.
 
 ## Hosted qualification
+
+Reference procedure for the dated receipts below. No new qualification was performed for the
+October 7 documentation close-out. Follow-up work mentioned inside a dated receipt describes the
+state at that time; later receipts and the current public status above supersede it where evidenced.
 
 Run this against <https://mcs-eng.github.io/loadshed/> in ChatGPT's in-app browser or Chrome 149+
 with the WebMCP testing flag enabled. Keep the agent and person roles separate.
@@ -245,7 +291,10 @@ rules-named client. The September 1 qualification receipt above remains the name
 human-click evidence. During the video shoot, repeat that click against tagged product `8e72e5f`
 so the recording also becomes the freshest named-client proof.
 
-## Video plan (target 1:30)
+## Historical video plan (target 1:30)
+
+Retained as the recording plan, not a transcript or audit of the published 1:26 video linked above.
+The requirements and recording instructions below belonged to the pre-submit workflow.
 
 The final public YouTube video must be less than three minutes, include audio, show the project
 functioning, and explain how it uses WebMCP. Use no copyrighted music or unlicensed third-party
@@ -311,10 +360,12 @@ what evidence is still missing. Injected clicks never become trusted evidence.�
 same six tools with a different page-owned priority: Hold my size. Loadshed is a small runtime for
 honest human-agent responsiveness contracts on the open web.”
 
-## Devpost final-form map
+## Historical Devpost final-form map — September 2, 2026
 
 The account is already registered for the challenge. The live submission form was re-read on
-September 2, 2026; these IDs and answers are a handoff, not a submitted entry.
+September 2, 2026; these IDs and answers preserve that handoff, not the final submitted answers.
+The project is now submitted. The blank/populated labels and operator instructions below describe
+only the September 2 form read; private final answers were not re-read for this close-out.
 
 | Field | Prepared answer or operator boundary |
 | --- | --- |
@@ -332,11 +383,15 @@ September 2, 2026; these IDs and answers are a handoff, not a submitted entry.
 | `28260` Career AI value | **OPERATOR:** choose Yes or No. |
 | Demo video | **OPERATOR:** paste the public narrated YouTube URL after verifying it. |
 
-Do not call final submit until every required answer and the video URL are present, the named-client
+Historical submission gate (retired): do not call final submit until every required answer and the video URL are present, the named-client
 run is recorded, and the operator has reviewed the rendered project page and explicitly authorized
 submission.
 
-## Operator close-out checklist
+## Historical operator close-out checklist (retired)
+
+Preserved with the September 30 tag correction. Unchecked boxes record what this handoff had not
+confirmed; they are not current tasks. The public submission and video are verified above. Private
+form values, a confirmation PDF, and additional browser runs are not inferred complete.
 
 - [x] Choose the public project name and repository owner.
 - [x] Run the allowlisted public exporter, initialize a new repository from its output, and confirm
