@@ -92,7 +92,7 @@ receipt schema, trust model, and copy-paste integration example.
 | [`src/sale-lateness.js`](src/sale-lateness.js) | Small pure helper for event-to-handler delay. |
 | [`test/`](test/) | Node tests for controller, trust, lifecycle, demo wiring, and release hygiene. |
 | [`scripts/Export-PublicRelease.ps1`](scripts/Export-PublicRelease.ps1) | Creates a product-only public release from an explicit allowlist. |
-| [`SUBMISSION.md`](SUBMISSION.md) | Draft Devpost copy, video plan, qualification steps, and external boundaries. |
+| [`SUBMISSION.md`](SUBMISSION.md) | Verified public submission state, dated qualification receipts, and historical pre-submit material. |
 
 The demos use deliberate synthetic main-thread work so the cut is visible on one machine. That is
 not a benchmark and does not claim to diagnose another tab, the operating system, the network, or
@@ -107,5 +107,5 @@ August 25. The local commit history records the spike, product selection, two de
 fixes, and release hardening. Internal development evidence stays outside the public export; the
 root Desk is the intentional product surface.
 
-The code is licensed under the [MIT License](LICENSE). Published artifacts, qualification evidence,
-and operator-owned close-out work are tracked honestly in [SUBMISSION.md](SUBMISSION.md).
+The code is licensed under the [MIT License](LICENSE). Verified public submission artifacts, dated
+qualification evidence, and the historical pre-submit handoff are recorded in [SUBMISSION.md](SUBMISSION.md).
